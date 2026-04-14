@@ -1,0 +1,116 @@
+{
+  "base_model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "description": "Benchmark-specific Bankai-style row XOR patch for humaneval_plus.",
+  "flips": [
+    {
+      "layer": 1,
+      "proj": "up_proj",
+      "row": 8
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 21
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 2
+    },
+    {
+      "layer": 1,
+      "proj": "gate_proj",
+      "row": 6
+    },
+    {
+      "layer": 4,
+      "proj": "up_proj",
+      "row": 32
+    },
+    {
+      "layer": 34,
+      "proj": "up_proj",
+      "row": 5
+    },
+    {
+      "layer": 3,
+      "proj": "gate_proj",
+      "row": 41
+    },
+    {
+      "layer": 1,
+      "proj": "up_proj",
+      "row": 5
+    },
+    {
+      "layer": 2,
+      "proj": "up_proj",
+      "row": 27
+    },
+    {
+      "layer": 2,
+      "proj": "up_proj",
+      "row": 31
+    },
+    {
+      "layer": 2,
+      "proj": "gate_proj",
+      "row": 15
+    },
+    {
+      "layer": 3,
+      "proj": "gate_proj",
+      "row": 39
+    },
+    {
+      "layer": 34,
+      "proj": "gate_proj",
+      "row": 7
+    },
+    {
+      "layer": 2,
+      "proj": "up_proj",
+      "row": 20
+    },
+    {
+      "layer": 3,
+      "proj": "up_proj",
+      "row": 14
+    },
+    {
+      "layer": 2,
+      "proj": "up_proj",
+      "row": 32
+    }
+  ],
+  "format": "bankai_row_xor_v1",
+  "metadata": {
+    "base_checksum": "27d59d1b703c3d2fb1c6e000cd8e4b247fdfc5de83c79e76ae5058f16b22ecd6",
+    "benchmark": "humaneval_plus",
+    "candidate_rows": 48,
+    "control_penalty": 2.0,
+    "created_at": 1775680431.632616,
+    "final_fitness": 0.59,
+    "rows_flipped": 16,
+    "screened_out": 0,
+    "search_iterations": 24,
+    "search_layers": [
+      1,
+      2,
+      3,
+      4,
+      34
+    ],
+    "search_projs": [
+      "gate_proj",
+      "up_proj"
+    ]
+  },
+  "name": "humaneval_plus_patch",
+  "stats": {
+    "bits_flipped": 65536,
+    "n_flips": 16,
+    "size_bytes": 192
+  },
+  "version": 1
+}

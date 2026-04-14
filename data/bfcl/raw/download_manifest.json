@@ -1,0 +1,32 @@
+{
+  "benchmark": "bfcl",
+  "created_at_ms": 1775680412244,
+  "preview": {
+    "BFCL_v3_live_simple.json": "{\"id\": \"live_simple_0-0-0\", \"ground_truth\": [{\"get_user_info\": {\"user_id\": [7890], \"special\": [\"black\"]}}]}\n",
+    "BFCL_v3_multi_turn_base.json": "{\"id\": \"multi_turn_base_0\", \"ground_truth\": [[\"cd(folder='document')\", \"mkdir(dir_name='temp')\", \"mv(source='final_report.pdf', destination='temp')\"], [\"cd(folder='temp')\", \"grep(file_name='final_report.pdf',pattern='budget analysis')\"], [\"sort('final_report.pdf')\"], [\"cd(folder='..')\", \"mv(source='previous_report.pdf',destination='temp')\", \"cd(folder='temp')\", \"diff(file_name1='final_report.pdf',file_name2='previous_report.pdf')\"]]}\n",
+    "BFCL_v3_simple.json": "{\"id\": \"simple_0\", \"ground_truth\": [{\"calculate_triangle_area\": {\"base\": [10], \"height\": [5], \"unit\": [\"units\", \"\"]}}]}\n"
+  },
+  "raw_files": [
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/bfcl/raw/BFCL_v3_simple.json",
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/bfcl/raw/BFCL_v3_live_simple.json",
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/bfcl/raw/BFCL_v3_multi_turn_base.json",
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/bfcl/raw/possible_answer/BFCL_v3_simple.json",
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/bfcl/raw/possible_answer/BFCL_v3_live_simple.json",
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/bfcl/raw/possible_answer/BFCL_v3_multi_turn_base.json"
+  ],
+  "repo_file_count": 51,
+  "rows": null,
+  "source": {
+    "files": [
+      "BFCL_v3_simple.json",
+      "BFCL_v3_live_simple.json",
+      "BFCL_v3_multi_turn_base.json",
+      "possible_answer/BFCL_v3_simple.json",
+      "possible_answer/BFCL_v3_live_simple.json",
+      "possible_answer/BFCL_v3_multi_turn_base.json"
+    ],
+    "kind": "huggingface_json_files",
+    "path": "gorilla-llm/Berkeley-Function-Calling-Leaderboard",
+    "primary_url": "https://huggingface.co/datasets/gorilla-llm/Berkeley-Function-Calling-Leaderboard"
+  }
+}

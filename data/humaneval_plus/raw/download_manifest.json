@@ -1,0 +1,21 @@
+{
+  "benchmark": "humaneval_plus",
+  "created_at_ms": 1775680360000,
+  "features": [
+    "task_id",
+    "prompt",
+    "canonical_solution",
+    "entry_point",
+    "test"
+  ],
+  "raw_files": [
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/humaneval_plus/raw/dataset.json"
+  ],
+  "rows": 164,
+  "source": {
+    "kind": "huggingface_dataset",
+    "path": "evalplus/humanevalplus",
+    "primary_url": "https://huggingface.co/datasets/evalplus/humanevalplus",
+    "split": "test"
+  }
+}

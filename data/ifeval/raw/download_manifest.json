@@ -1,0 +1,20 @@
+{
+  "benchmark": "ifeval",
+  "created_at_ms": 1775680361428,
+  "features": [
+    "key",
+    "prompt",
+    "instruction_id_list",
+    "kwargs"
+  ],
+  "raw_files": [
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/ifeval/raw/dataset.json"
+  ],
+  "rows": 541,
+  "source": {
+    "kind": "huggingface_dataset",
+    "path": "google/IFEval",
+    "primary_url": "https://huggingface.co/datasets/google/IFEval",
+    "split": "train"
+  }
+}

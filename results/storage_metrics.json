@@ -1,0 +1,32 @@
+{
+  "base_backend": "mock_bonsai_backend",
+  "created_at_ms": 1775680435713,
+  "patches": [
+    {
+      "benchmark": "gsm8k",
+      "bytes": 1941,
+      "flips": 16,
+      "logical_patch_bytes": 192
+    },
+    {
+      "benchmark": "humaneval_plus",
+      "bytes": 1960,
+      "flips": 16,
+      "logical_patch_bytes": 192
+    },
+    {
+      "benchmark": "ifeval",
+      "bytes": 1959,
+      "flips": 16,
+      "logical_patch_bytes": 192
+    },
+    {
+      "benchmark": "bfcl",
+      "bytes": 1942,
+      "flips": 16,
+      "logical_patch_bytes": 192
+    }
+  ],
+  "total_logical_patch_bytes": 768,
+  "total_patch_bytes": 7802
+}

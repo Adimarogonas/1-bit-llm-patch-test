@@ -1,0 +1,22 @@
+{
+  "model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "examples": 50,
+  "base": {
+    "correct": 2,
+    "accuracy": 0.04
+  },
+  "patches": {
+    "gsm8k_real_patch_curated_pool32_topk6.json": {
+      "correct": 1,
+      "accuracy": 0.02,
+      "delta_accuracy": -0.02,
+      "changed_generations": 33
+    },
+    "gsm8k_real_patch.json": {
+      "correct": 4,
+      "accuracy": 0.08,
+      "delta_accuracy": 0.04,
+      "changed_generations": 35
+    }
+  }
+}

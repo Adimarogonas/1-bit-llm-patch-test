@@ -1,0 +1,136 @@
+{
+  "candidates": [
+    {
+      "has_scales": true,
+      "path": "model.layers.1.mlp.gate_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.1.mlp.up_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.2.mlp.gate_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.2.mlp.up_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.3.mlp.gate_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.3.mlp.up_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.4.mlp.gate_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.4.mlp.up_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.34.mlp.gate_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    },
+    {
+      "has_scales": true,
+      "path": "model.layers.34.mlp.up_proj",
+      "scales_shape": [
+        12288,
+        32
+      ],
+      "weight_dtype": "mlx.core.uint32",
+      "weight_shape": [
+        12288,
+        128
+      ]
+    }
+  ],
+  "model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "patchable": true
+}

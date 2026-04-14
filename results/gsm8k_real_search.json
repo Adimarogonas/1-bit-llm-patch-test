@@ -1,0 +1,96 @@
+{
+  "benchmark": "gsm8k",
+  "best_score": 0.013020833333333334,
+  "created_at_ms": 1776138565964,
+  "mode": "anneal_shortlist",
+  "patch_path": "/Users/andrewdimarogonas/Desktop/bankai_poc/patches/gsm8k_real_patch_anneal_stable_weighted_s4_pool4_topk1.json",
+  "trajectory": [
+    {
+      "accept_prob": 1.0,
+      "accepted": true,
+      "active_flips": 1,
+      "added": {
+        "layer": 20,
+        "proj": "gate_proj",
+        "row": 25,
+        "scale_mean": 0.060028076171875
+      },
+      "best_fitness": 0.013020833333333334,
+      "candidate_score": 0.013020833333333334,
+      "current_fitness": 0.013020833333333334,
+      "delta": 0.013020833333333334,
+      "move": "add",
+      "removed": null,
+      "screen_gain": 0.015625,
+      "step": 0,
+      "temperature": 0.02,
+      "validation_gain": -0.0078125
+    },
+    {
+      "accept_prob": 0.17081076560541966,
+      "accepted": false,
+      "active_flips": 1,
+      "added": {
+        "layer": 22,
+        "proj": "gate_proj",
+        "row": 36,
+        "scale_mean": 0.1412353515625
+      },
+      "best_fitness": 0.013020833333333334,
+      "candidate_score": 0.0,
+      "current_fitness": 0.013020833333333334,
+      "delta": -0.013020833333333334,
+      "move": "swap",
+      "removed": {
+        "layer": 20,
+        "proj": "gate_proj",
+        "row": 25
+      },
+      "screen_gain": 0.0546875,
+      "step": 1,
+      "temperature": 0.007368062997280774,
+      "validation_gain": -0.0234375
+    },
+    {
+      "accept_prob": 0.38312912609484645,
+      "accepted": true,
+      "active_flips": 2,
+      "added": {
+        "layer": 24,
+        "proj": "up_proj",
+        "row": 7,
+        "scale_mean": 0.0869140625
+      },
+      "best_fitness": 0.013020833333333334,
+      "candidate_score": 0.010416666666666666,
+      "current_fitness": 0.010416666666666666,
+      "delta": -0.002604166666666668,
+      "move": "add",
+      "removed": null,
+      "screen_gain": 0.015625,
+      "step": 2,
+      "temperature": 0.002714417616594907,
+      "validation_gain": 0.0
+    },
+    {
+      "accept_prob": 0.0004046451693262645,
+      "accepted": false,
+      "active_flips": 2,
+      "added": null,
+      "best_fitness": 0.013020833333333334,
+      "candidate_score": 0.0026041666666666665,
+      "current_fitness": 0.010416666666666666,
+      "delta": -0.0078125,
+      "move": "remove",
+      "removed": {
+        "layer": 20,
+        "proj": "gate_proj",
+        "row": 25
+      },
+      "screen_gain": null,
+      "step": 3,
+      "temperature": 0.001,
+      "validation_gain": 0.0078125
+    }
+  ]
+}

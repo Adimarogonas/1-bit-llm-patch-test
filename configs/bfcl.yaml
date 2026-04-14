@@ -1,0 +1,22 @@
+benchmark: bfcl
+display_name: BFCL
+source:
+  kind: huggingface_json_files
+  path: gorilla-llm/Berkeley-Function-Calling-Leaderboard
+  files:
+    - BFCL_v3_simple.json
+    - BFCL_v3_live_simple.json
+    - BFCL_v3_multi_turn_base.json
+    - possible_answer/BFCL_v3_simple.json
+    - possible_answer/BFCL_v3_live_simple.json
+    - possible_answer/BFCL_v3_multi_turn_base.json
+  primary_url: https://huggingface.co/datasets/gorilla-llm/Berkeley-Function-Calling-Leaderboard
+search:
+  iterations: 24
+  candidate_rows: 48
+  max_flips: 16
+  search_layers: [1, 2, 3, 4, 34]
+  search_projs: ["gate_proj", "up_proj"]
+  control_penalty: 2.0
+probe:
+  type: tool_choice_pair

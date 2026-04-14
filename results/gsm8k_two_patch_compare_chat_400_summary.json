@@ -1,0 +1,30 @@
+{
+  "model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "examples": 50,
+  "prompt_style": "qwen3_chatml_final_answer",
+  "max_tokens": 400,
+  "base": {
+    "correct": 42,
+    "accuracy": 0.84,
+    "with_final_answer_marker": 48,
+    "likely_truncated": 0
+  },
+  "patches": {
+    "gsm8k_real_patch_curated_pool32_topk6.json": {
+      "correct": 42,
+      "accuracy": 0.84,
+      "delta_accuracy": 0.0,
+      "changed_generations": 26,
+      "with_final_answer_marker": 49,
+      "likely_truncated": 0
+    },
+    "gsm8k_real_patch.json": {
+      "correct": 38,
+      "accuracy": 0.76,
+      "delta_accuracy": -0.08,
+      "changed_generations": 30,
+      "with_final_answer_marker": 49,
+      "likely_truncated": 0
+    }
+  }
+}

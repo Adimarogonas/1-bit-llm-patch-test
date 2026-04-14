@@ -1,0 +1,17 @@
+{
+  "base_accuracy": 0.75,
+  "base_correct": 15,
+  "base_likely_truncated": 0,
+  "base_with_final_answer_marker": 18,
+  "changed_generations": 0,
+  "delta_accuracy": 0.0,
+  "examples": 20,
+  "max_tokens": 400,
+  "model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "patch": "/Users/andrewdimarogonas/Desktop/bankai_poc/patches/gsm8k_real_patch_anneal_stable_weighted_s4_pool4_topk1.json",
+  "patched_accuracy": 0.75,
+  "patched_correct": 15,
+  "patched_likely_truncated": 0,
+  "patched_with_final_answer_marker": 18,
+  "prompt_style": "qwen3_chatml_final_answer"
+}

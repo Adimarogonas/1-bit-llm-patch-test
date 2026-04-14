@@ -1,0 +1,19 @@
+{
+  "benchmark": "gsm8k",
+  "created_at_ms": 1775680358734,
+  "features": [
+    "question",
+    "answer"
+  ],
+  "raw_files": [
+    "/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/data/gsm8k/raw/dataset.json"
+  ],
+  "rows": 1319,
+  "source": {
+    "kind": "huggingface_dataset",
+    "name": "main",
+    "path": "openai/gsm8k",
+    "primary_url": "https://huggingface.co/datasets/openai/gsm8k",
+    "split": "test"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "created_at_ms": 1775680437478,
+  "router_table": {
+    "bfcl": "bfcl",
+    "gsm8k": "gsm8k",
+    "humaneval_plus": "humaneval_plus",
+    "ifeval": "ifeval"
+  },
+  "rows": 4,
+  "total_router_overhead_ms": 0.2
+}

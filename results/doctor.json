@@ -1,0 +1,18 @@
+{
+  "bankai_available": false,
+  "datasets_available": true,
+  "github_bankai_compatible": false,
+  "metal_compiler_available": true,
+  "metallib_available": true,
+  "mlx_available": true,
+  "mlx_lm_available": true,
+  "mlx_version": "0.31.2.dev20260408+72ec298",
+  "notes": [
+    "`mlx` version detected: 0.31.2.dev20260408+72ec298. Stock MLX will not load Bonsai 1-bit correctly; use the PrismML fork.",
+    "GitHub Bankai package not installed; using local Bankai-shaped patch format only.",
+    "MLX runtime prerequisites look present. Real Bonsai loading still depends on having the PrismML MLX fork installed."
+  ],
+  "numpy_available": true,
+  "prism_mlx_ready": true,
+  "python": "3.13.0"
+}

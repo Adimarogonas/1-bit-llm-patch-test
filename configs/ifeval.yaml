@@ -1,0 +1,16 @@
+benchmark: ifeval
+display_name: IFEval
+source:
+  kind: huggingface_dataset
+  path: google/IFEval
+  split: train
+  primary_url: https://huggingface.co/datasets/google/IFEval
+search:
+  iterations: 24
+  candidate_rows: 48
+  max_flips: 16
+  search_layers: [1, 2, 3, 4, 34]
+  search_projs: ["gate_proj", "up_proj"]
+  control_penalty: 2.0
+probe:
+  type: compliance_pair

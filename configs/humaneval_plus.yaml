@@ -1,0 +1,16 @@
+benchmark: humaneval_plus
+display_name: HumanEval+
+source:
+  kind: huggingface_dataset
+  path: evalplus/humanevalplus
+  split: test
+  primary_url: https://huggingface.co/datasets/evalplus/humanevalplus
+search:
+  iterations: 24
+  candidate_rows: 48
+  max_flips: 16
+  search_layers: [1, 2, 3, 4, 34]
+  search_projs: ["gate_proj", "up_proj"]
+  control_penalty: 2.0
+probe:
+  type: completion_pair
