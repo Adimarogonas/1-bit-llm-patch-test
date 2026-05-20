@@ -10,6 +10,7 @@ from bankai_poc.eval.pipeline import (
     ModelConfig,
     PipelineConfig,
     build_csv_eval_dataset,
+    run_programmatic_assessment,
     run_pipeline,
 )
 from bankai_poc.search.probe_eval import compute_fitness_min
@@ -248,6 +249,91 @@ def test_expected_json_detects_wrong_tool_and_argument_key(tmp_path: Path) -> No
     assert "arguments" in mismatch_paths
 
 
+def test_expected_json_scores_truncated_output_when_strict_fields_match(tmp_path: Path) -> None:
+    csv_path = tmp_path / "tool_call_json.csv"
+    csv_path.write_text(
+        'id,prompt,expected_json,assessment,strict_fields,soft_fields\n'
+        'case-1,Email Lisa.,'
+        '"{""name"":""send_email"",""arguments"":{""to"":""lisa.park@retail.io"",""subject"":""Thanks"",""body"":""Thanks.""}}",'
+        'json_match,"name,arguments.to","arguments.subject,arguments.body"\n',
+        encoding="utf-8",
+    )
+
+    _, details_path = run_pipeline(
+        PipelineConfig(
+            dataset_path=csv_path,
+            models=[
+                ModelConfig(
+                    name="json-agent",
+                    kind="terminal",
+                    command=(
+                        "printf '{\"name\":\"send_email\",\"arguments\":{\"to\":\"lisa.park@retail.io\","
+                        "\"subject\":\"Thanks\",\"body\":\"Long body\"}'"
+                    ),
+                )
+            ],
+            output_dir=tmp_path / "run_expected_json_truncated",
+        )
+    )
+
+    details = load_json(details_path)
+    score = details["rows"][0]["score"]
+
+    assert score["passed"] is True
+    assert score["reason"] == "ok_truncated_json_fields"
+    assert score["actual_fields"]["arguments.to"] == "lisa.park@retail.io"
+
+
+def test_regex_assessment_accepts_common_answer_formatting() -> None:
+    row = {"id": "case-1"}
+
+    assert run_programmatic_assessment(
+        row,
+        "### **Final Answer:**\n**90**",
+        r"final answer:\s*90(?:\.0+)?(?![\d.])",
+        "regex",
+    )["passed"] is True
+    assert run_programmatic_assessment(
+        row,
+        "work\nFinal answer: 90.",
+        r"final answer:\s*90(?:\.0+)?(?![\d.])",
+        "regex",
+    )["passed"] is True
+    assert run_programmatic_assessment(
+        row,
+        "Final answer: 91.",
+        r"final answer:\s*90(?:\.0+)?(?![\d.])",
+        "regex",
+    )["passed"] is False
+
+
+def test_numeric_final_assessment_compares_final_answer_number() -> None:
+    row = {"id": "case-1"}
+
+    score = run_programmatic_assessment(
+        row,
+        "Work shown here.\n### **Final Answer:**\n**$1,234.50.**",
+        "$1,234.5",
+        "numeric_final",
+    )
+    assert score["passed"] is True
+    assert score["actual"] == 1234.5
+    assert score["expected_numeric"] == 1234.5
+
+    assert run_programmatic_assessment(
+        row,
+        "Final answer: 6.481",
+        "6.480",
+        "numeric_final:0.01",
+    )["passed"] is True
+    assert run_programmatic_assessment(
+        row,
+        "Final answer: 91.",
+        "90",
+        "numeric_final",
+    )["passed"] is False
+
+
 def test_dynamic_probes_use_failures_as_targets_and_passes_as_controls(tmp_path: Path) -> None:
     dataset_path = tmp_path / "routing.csv"
     dataset_path.write_text(
@@ -294,6 +380,110 @@ def test_dynamic_probes_use_failures_as_targets_and_passes_as_controls(tmp_path:
     assert probes[0]["correct_completion"] == "billing"
     assert probes[0]["wrong_completion"] == "sales"
     assert probes[1]["metadata"]["partition"] == "control"
+
+
+def test_dynamic_regex_probe_uses_representative_answer_not_pattern(tmp_path: Path) -> None:
+    dataset_path = tmp_path / "math.csv"
+    dataset_path.write_text(
+        "id,prompt,expected,assessment\n"
+        "case-1,What is 45 plus 45?,final answer:\\s*90(?:\\.0+)?(?![\\d.]),regex\n"
+        "case-2,What is 20 plus 20?,final answer:\\s*40(?:\\.0+)?(?![\\d.]),regex\n",
+        encoding="utf-8",
+    )
+    details_path = tmp_path / "details.json"
+    details_path.write_text(
+        """
+{
+  "rows": [
+    {
+      "model": "base-model",
+      "task": "math",
+      "benchmark": "math",
+      "id": "case-1",
+      "prompt": "What is 45 plus 45?",
+      "expected": "final answer:\\\\s*90(?:\\\\.0+)?(?![\\\\d.])",
+      "prediction": "Final answer: 91.",
+      "score": {"assessment": "regex", "passed": false}
+    },
+    {
+      "model": "base-model",
+      "task": "math",
+      "benchmark": "math",
+      "id": "case-2",
+      "prompt": "What is 20 plus 20?",
+      "expected": "final answer:\\\\s*40(?:\\\\.0+)?(?![\\\\d.])",
+      "prediction": "Final answer: 40",
+      "score": {"assessment": "regex", "expected": "final answer:\\\\s*40(?:\\\\.0+)?(?![\\\\d.])", "passed": true}
+    }
+  ]
+}
+""",
+        encoding="utf-8",
+    )
+
+    probes_path = build_dynamic_probes_from_details(details_path, dataset_path, tmp_path / "probes.jsonl")
+    probes = [json.loads(line) for line in probes_path.read_text(encoding="utf-8").splitlines()]
+    probe = next(probe for probe in probes if probe["metadata"]["partition"] == "search")
+    control_probe = next(probe for probe in probes if probe["metadata"]["partition"] == "control")
+    raw_probe_text = probes_path.read_text(encoding="utf-8")
+
+    assert probe["metadata"]["target_kind"] == "regex_label"
+    assert probe["correct_completion"] == "final answer: 90"
+    assert probe["wrong_completion"] == "91"
+    assert control_probe["correct_completion"] == "final answer: 40"
+    assert control_probe["metadata"]["base_score"]["expected"] == "final answer: 40"
+    assert "\\\\s*" not in raw_probe_text
+    assert "(?!" not in raw_probe_text
+
+
+def test_dynamic_numeric_final_probe_uses_canonical_numbers(tmp_path: Path) -> None:
+    dataset_path = tmp_path / "math.csv"
+    dataset_path.write_text(
+        "id,prompt,expected,assessment\n"
+        'case-1,What is the total?,"$1,234.50",numeric_final\n'
+        "case-2,What is half of ten?,5.0,numeric_final\n",
+        encoding="utf-8",
+    )
+    details_path = tmp_path / "details.json"
+    details_path.write_text(
+        """
+{
+  "rows": [
+    {
+      "model": "base-model",
+      "task": "math",
+      "benchmark": "math",
+      "id": "case-1",
+      "prompt": "What is the total?",
+      "expected": "$1,234.50",
+      "prediction": "Final answer: $1235.",
+      "score": {"assessment": "numeric_final", "passed": false}
+    },
+    {
+      "model": "base-model",
+      "task": "math",
+      "benchmark": "math",
+      "id": "case-2",
+      "prompt": "What is half of ten?",
+      "expected": "5.0",
+      "prediction": "Final answer: 5",
+      "score": {"assessment": "numeric_final", "passed": true}
+    }
+  ]
+}
+""",
+        encoding="utf-8",
+    )
+
+    probes_path = build_dynamic_probes_from_details(details_path, dataset_path, tmp_path / "numeric_probes.jsonl")
+    probes = [json.loads(line) for line in probes_path.read_text(encoding="utf-8").splitlines()]
+    search_probe = next(probe for probe in probes if probe["metadata"]["partition"] == "search")
+    control_probe = next(probe for probe in probes if probe["metadata"]["partition"] == "control")
+
+    assert search_probe["metadata"]["target_kind"] == "numeric_final"
+    assert search_probe["correct_completion"] == "1234.5"
+    assert search_probe["wrong_completion"] == "1235"
+    assert control_probe["correct_completion"] == "5"
 
 
 def test_dynamic_json_field_probe_targets_wrong_tool_before_argument(tmp_path: Path) -> None:
@@ -511,6 +701,54 @@ def test_dynamic_expected_json_probe_uses_structured_diff_without_known_tool_nam
     assert key_probe["prompt"].endswith('{"name": "page_user", "arguments": {')
     assert key_probe["correct_completion"] == "recipient"
     assert key_probe["wrong_completion"] == "team"
+
+
+def test_dynamic_expected_json_controls_use_path_specific_rivals(tmp_path: Path) -> None:
+    dataset_path = tmp_path / "tool_call.csv"
+    dataset_path.write_text(
+        'id,prompt,expected_json,assessment,strict_fields,soft_fields,system\n'
+        'case-1,Escalate urgent ticket.,'
+        '"{""name"":""escalate_ticket"",""arguments"":{""ticket_id"":""TKT-1"",""priority"":""urgent"",""team"":""security""}}",'
+        'json_match,"name,arguments.ticket_id,arguments.priority,arguments.team",,Return JSON.\n'
+        'case-2,Escalate high ticket.,'
+        '"{""name"":""escalate_ticket"",""arguments"":{""ticket_id"":""TKT-2"",""priority"":""high"",""team"":""network""}}",'
+        'json_match,"name,arguments.ticket_id,arguments.priority,arguments.team",,Return JSON.\n'
+        'case-3,Email ops.,'
+        '"{""name"":""send_email"",""arguments"":{""to"":""ops@example.com"",""subject"":""Ops"",""body"":""Ping ops.""}}",'
+        'json_match,"name,arguments.to","arguments.subject,arguments.body",Return JSON.\n',
+        encoding="utf-8",
+    )
+    details_path = tmp_path / "details.json"
+    details_path.write_text(
+        """
+{
+  "rows": [
+    {
+      "model": "base-model",
+      "task": "tool_call",
+      "benchmark": "tool_call",
+      "id": "case-1",
+      "prompt": "Escalate urgent ticket.",
+      "expected_json": "{\\"name\\":\\"escalate_ticket\\",\\"arguments\\":{\\"ticket_id\\":\\"TKT-1\\",\\"priority\\":\\"urgent\\",\\"team\\":\\"security\\"}}",
+      "prediction": "{\\"name\\":\\"escalate_ticket\\",\\"arguments\\":{\\"ticket_id\\":\\"TKT-1\\",\\"priority\\":\\"urgent\\",\\"team\\":\\"security\\"}}",
+      "score": {"assessment": "json_match", "passed": true}
+    }
+  ]
+}
+""",
+        encoding="utf-8",
+    )
+
+    probes_path = build_dynamic_probes_from_details(details_path, dataset_path, tmp_path / "probes.jsonl")
+    probes = [json.loads(line) for line in probes_path.read_text(encoding="utf-8").splitlines()]
+
+    name_probe = next(probe for probe in probes if probe["metadata"]["target_kind"] == "json_path.name_control")
+    priority_probe = next(probe for probe in probes if probe["metadata"]["target_kind"] == "json_path.arguments.priority_control")
+
+    assert name_probe["correct_completion"] == "escalate_ticket"
+    assert name_probe["wrong_completion"] == "send_email"
+    assert priority_probe["correct_completion"] == "urgent"
+    assert priority_probe["wrong_completion"] == "high"
 
 
 def test_min_fitness_uses_worst_target_probe() -> None:

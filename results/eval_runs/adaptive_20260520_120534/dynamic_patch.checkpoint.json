@@ -1,0 +1,112 @@
+{
+  "base_model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "description": "Checkpoint for dynamic practical-eval Bankai greedy patch for multi_step_reasoning.",
+  "flips": [
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 11711
+    },
+    {
+      "layer": 35,
+      "proj": "up_proj",
+      "row": 8249
+    },
+    {
+      "layer": 3,
+      "proj": "up_proj",
+      "row": 997
+    },
+    {
+      "layer": 0,
+      "proj": "up_proj",
+      "row": 8228
+    },
+    {
+      "layer": 2,
+      "proj": "up_proj",
+      "row": 5809
+    },
+    {
+      "layer": 1,
+      "proj": "up_proj",
+      "row": 3991
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 4048
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 2276
+    },
+    {
+      "layer": 0,
+      "proj": "gate_proj",
+      "row": 10383
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 3086
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 2652
+    },
+    {
+      "layer": 0,
+      "proj": "down_proj",
+      "row": 2577
+    },
+    {
+      "layer": 34,
+      "proj": "gate_proj",
+      "row": 6517
+    },
+    {
+      "layer": 34,
+      "proj": "up_proj",
+      "row": 3300
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 4494
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 3281
+    }
+  ],
+  "format": "bankai_row_xor_v1",
+  "metadata": {
+    "checkpoint": true,
+    "final_fitness": 1.8519531250000003,
+    "impact_weighted": true,
+    "layer_profile": "stable",
+    "search_algorithm": "dynamic_real_greedy_screened_mean",
+    "search_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      34,
+      35
+    ],
+    "step": 52,
+    "task": "multi_step_reasoning"
+  },
+  "name": "multi_step_reasoning_dynamic_greedy_patch",
+  "stats": {
+    "bits_flipped": 65536,
+    "n_flips": 16,
+    "size_bytes": 192
+  },
+  "version": 1
+}

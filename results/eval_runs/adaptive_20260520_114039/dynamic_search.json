@@ -1,0 +1,106 @@
+{
+  "accept_per_round": 1,
+  "best_score": 0.0337613500929214,
+  "created_at_ms": 1779302722525,
+  "mode": "dynamic_shortlist",
+  "patch_path": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260520_114039/dynamic_patch.json",
+  "task": "multi_step_reasoning",
+  "trajectory": [
+    {
+      "accept_slot": 0,
+      "accepted": true,
+      "candidate_score": 0.01646664074283577,
+      "layer": 1,
+      "proj": "gate_proj",
+      "round": 0,
+      "row": 10007,
+      "scale_mean": 0.12353515625,
+      "screen_gain": 0.011788504464285587,
+      "validation_gain": 0.006062080280830588
+    },
+    {
+      "accept_slot": 0,
+      "accepted": false,
+      "candidate_score": -0.002394471911360366,
+      "layer": 3,
+      "proj": "gate_proj",
+      "round": 0,
+      "row": 5918,
+      "scale_mean": 0.1121826171875,
+      "screen_gain": 0.009588555975274193,
+      "validation_gain": 0.011248712225275051
+    },
+    {
+      "accept_slot": 0,
+      "accepted": false,
+      "candidate_score": 0.017944919854961383,
+      "layer": 0,
+      "proj": "down_proj",
+      "round": 1,
+      "row": 666,
+      "scale_mean": 0.089111328125,
+      "screen_gain": 0.019189631982600375,
+      "validation_gain": 0.006356360653235822
+    },
+    {
+      "accept_slot": 0,
+      "accepted": true,
+      "candidate_score": 0.02506331559065948,
+      "layer": 1,
+      "proj": "up_proj",
+      "round": 1,
+      "row": 11697,
+      "scale_mean": 0.09368896484375,
+      "screen_gain": 0.01888915121336998,
+      "validation_gain": 0.004643381791819519
+    },
+    {
+      "accept_slot": 0,
+      "accepted": true,
+      "candidate_score": 0.0337613500929214,
+      "layer": 4,
+      "proj": "gate_proj",
+      "round": 2,
+      "row": 7599,
+      "scale_mean": 0.150390625,
+      "screen_gain": 0.02624019860347948,
+      "validation_gain": -0.009592967796092053
+    },
+    {
+      "accept_slot": 0,
+      "accepted": false,
+      "candidate_score": 0.02317864044656311,
+      "layer": 3,
+      "proj": "down_proj",
+      "round": 2,
+      "row": 3879,
+      "scale_mean": 0.05108642578125,
+      "screen_gain": 0.02516168727106205,
+      "validation_gain": 0.004808169261294755
+    },
+    {
+      "accept_slot": 0,
+      "accepted": false,
+      "candidate_score": 0.015026503890819016,
+      "layer": 3,
+      "proj": "gate_proj",
+      "round": 3,
+      "row": 8086,
+      "scale_mean": 0.11041259765625,
+      "screen_gain": 0.03971533024267382,
+      "validation_gain": -0.007934838598900798
+    },
+    {
+      "accept_slot": 0,
+      "accepted": false,
+      "candidate_score": 0.01744245624932687,
+      "layer": 4,
+      "proj": "gate_proj",
+      "round": 3,
+      "row": 3465,
+      "scale_mean": 0.1253662109375,
+      "screen_gain": 0.03045229510073222,
+      "validation_gain": -0.0013473939255185623
+    }
+  ]
+}

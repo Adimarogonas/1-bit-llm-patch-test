@@ -1,0 +1,46 @@
+{
+  "dataset_path": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/data/practical_evals/multi_step_reasoning.csv",
+  "judge": {
+    "command": "",
+    "mode": "auto",
+    "timeout_s": 180
+  },
+  "max_tokens": 640,
+  "models": [
+    {
+      "command": "",
+      "enabled": true,
+      "kind": "mlx",
+      "model_ref": "prism-ml/Bonsai-8B-mlx-1bit",
+      "name": "base-model",
+      "patch_path": null,
+      "timeout_s": 180
+    }
+  ],
+  "summary": [
+    {
+      "accuracy": 0.9,
+      "benchmark": "all",
+      "correct": 27,
+      "elapsed_s": 54.164079041998775,
+      "errors": 0,
+      "examples": 30,
+      "kind": "mlx",
+      "mean_latency_ms": 1805.2682790662705,
+      "model": "base-model",
+      "scored_examples": 30
+    },
+    {
+      "accuracy": 0.9,
+      "benchmark": "multi_step_reasoning",
+      "correct": 27,
+      "elapsed_s": 54.164079041998775,
+      "errors": 0,
+      "examples": 30,
+      "kind": "mlx",
+      "mean_latency_ms": 1805.2682790662705,
+      "model": "base-model",
+      "scored_examples": 30
+    }
+  ]
+}

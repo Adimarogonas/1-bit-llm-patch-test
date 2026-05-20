@@ -1,0 +1,46 @@
+{
+  "dataset_path": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/data/practical_evals/multi_step_reasoning.csv",
+  "judge": {
+    "command": "",
+    "mode": "auto",
+    "timeout_s": 180
+  },
+  "max_tokens": 640,
+  "models": [
+    {
+      "command": "",
+      "enabled": true,
+      "kind": "bankai_mlx",
+      "model_ref": "prism-ml/Bonsai-8B-mlx-1bit",
+      "name": "patched-model",
+      "patch_path": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260520_120534/dynamic_patch.json",
+      "timeout_s": 180
+    }
+  ],
+  "summary": [
+    {
+      "accuracy": 0.9333333333333333,
+      "benchmark": "all",
+      "correct": 28,
+      "elapsed_s": 54.229348207998555,
+      "errors": 0,
+      "examples": 30,
+      "kind": "bankai_mlx",
+      "mean_latency_ms": 1807.5887151001855,
+      "model": "patched-model",
+      "scored_examples": 30
+    },
+    {
+      "accuracy": 0.9333333333333333,
+      "benchmark": "multi_step_reasoning",
+      "correct": 28,
+      "elapsed_s": 54.229348207998555,
+      "errors": 0,
+      "examples": 30,
+      "kind": "bankai_mlx",
+      "mean_latency_ms": 1807.5887151001855,
+      "model": "patched-model",
+      "scored_examples": 30
+    }
+  ]
+}

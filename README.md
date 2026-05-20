@@ -1,14 +1,15 @@
-# Bankai Patch-Routing POC
+# Bankai Eval Studio
 
-This workspace scaffolds a benchmark-patched 1-bit Bonsai proof of concept inspired by [nikshepsvn/bankai](https://github.com/nikshepsvn/bankai):
+This workspace builds on Nikshep Saravanan's [Bankai](https://github.com/nikshepsvn/bankai) work on ultra-sparse XOR patching for 1-bit LLMs. The core Bankai idea is the adaptation substrate here; the focus of this repo is the evaluation pipeline around it:
 
-- one shared base backend
-- one reversible row-XOR patch per benchmark
-- patch search + artifact logging
-- per-benchmark and routed evaluation
-- storage, latency, and reversibility reporting
+- practical CSV eval ingestion
+- programmatic and judge-based scoring
+- adaptive base-vs-patched evaluation
+- dynamic probes built from actual base-model mistakes
+- fixed/regressed/still-wrong comparison views
+- reproducible artifacts under `results/eval_runs`
 
-The default backend is a deterministic mock backend so the full pipeline is runnable without Bonsai weights. It mirrors Bankai's `layer/proj/row` patch structure and row-level XOR application, but does not depend on `mlx`. This repo also now includes a real MLX/Bonsai path for live model inspection, live row-XOR mutation, real greedy search, real shortlist search, and base-vs-patched GSM8K spot evaluation.
+The default backend is a deterministic mock backend so the pipeline is runnable without Bonsai weights. The real path uses `prism-ml/Bonsai-8B-mlx-1bit` through the PrismML MLX fork and applies Bankai-style `layer/proj/row` XOR patches before inference.
 
 ## Current Status
 
@@ -17,13 +18,16 @@ What is real today:
 - the PrismML MLX fork can load `prism-ml/Bonsai-8B-mlx-1bit`
 - `inspect-model` confirms the expected packed `uint32` MLP row layout
 - real row-XOR patch application and exact revert work on live Bonsai
-- `real-search` and `real-shortlist-search` can produce non-empty patches on the live model
+- CSV evals can run through base, patched, reference, and terminal-agent models
+- adaptive evals build probes from base failures and controls from base passes
+- scoring supports exact/normalized labels, regex, `numeric_final`, JSON field/path checks, structured JSON matching, and command-based judges
+- stored run artifacts support side-by-side fixed/regressed/still-wrong review
 
 What is not proven yet:
 
 - real benchmark gains across GSM8K, HumanEval+, IFEval, or BFCL
-- that probe-level search improvements consistently translate into generation-level improvements
-- that the current search objective is strong enough for broad arithmetic or reasoning gains
+- that probe-level improvements consistently translate into generation-level improvements
+- that the current dynamic-probe objectives generalize beyond small held-out CSVs
 
 ## Layout
 
@@ -128,8 +132,10 @@ Programmatic assessment modes:
 - `classification` or `routing`: aliases for `exact_normalized`
 - `exact`: trimmed raw equality
 - `contains`: normalized prediction contains normalized expected
-- `regex`: expected is a case-insensitive regex
+- `regex`: expected is a case-insensitive regex; generated answers are normalized for common markdown/newline/trailing-period formatting
+- `numeric_final`: extract the final numeric answer, strip `$`, commas, markdown, and terminal punctuation, then compare numerically; use `numeric_final:0.01` for an explicit tolerance
 - `json_field:<field>`: parse prediction as JSON and compare a field or dotted path
+- `json_match`: compare expected and predicted JSON objects, with optional `strict_fields` and `soft_fields`
 - `llm_judge`: explicitly use the configured judge command
 
 CLI-only equivalent:
@@ -177,47 +183,44 @@ bankai-poc eval-adapt \
   --accept-per-round 2
 ```
 
-This runs the base model first, builds dynamic probes from failed rows, uses passing rows as controls, searches a patch, and re-runs the same CSV with the patch applied. The Electron app exposes this as the main non-technical workflow with native file pickers. Use `--search-mode shortlist` for the batched shortlist search, or `--search-mode greedy` for screened greedy hill climbing. In greedy mode, `--candidate-rows 0` searches every row in each selected layer/projection.
+This runs the base model first, builds dynamic probes from failed rows, uses passing rows as controls, searches a Bankai XOR patch, and re-runs the same CSV with the patch applied. The Electron app exposes this as the main workflow with native file pickers and stored run inspection.
 
-## Recommended Real Search Flow
+## Probe Improvements
 
-For smaller Apple Silicon machines, shortlist search is still the fastest option. On larger machines, the adaptive eval flow can use screened greedy search to try more rows and keep every flip that improves probe fitness.
+The important implementation work is in the probe builder, not only in the row search loop.
 
-Smoke run:
+- For structured JSON/tool-call outputs, probes target the first divergent boundary: tool name, argument key, then argument value.
+- For non-JSON label tasks, probes use the expected label and the model's actual wrong output.
+- For regex rows, probes use representative answer text instead of dumping raw regex syntax into `correct_completion`, `wrong_completion`, or probe metadata.
+- For `numeric_final` rows, probes use canonical numeric completions such as `32.2` or `180.5`.
+- Multi-token continuations are scored with teacher-forced mean log probability, so `send_email` vs `escalate_ticket` or an email address is not collapsed to one brittle token.
+- Controls are built from rows the base model already passes, so a patch is penalized when it damages known-good behavior.
 
-```bash
-bankai-poc real-shortlist-search gsm8k --model prism-ml/Bonsai-8B-mlx-1bit --rounds 3 --pool 6 --topk 2 --target-probes 6 --control-probes 3
+Patch search is still present (`shortlist`, `greedy`, and related real-search commands), but generation-level eval is the promotion gate. Probe fitness alone is not treated as success.
+
+## Current Results Snapshot
+
+The strongest current result is the adaptive tool-call pipeline on `tool_call_selection.csv`:
+
+| Dataset | Base | Patched | Notes |
+|---|---:|---:|---|
+| `tool_call_selection.csv` | 62/70, 88.6% | 66/70, 94.3% | 16 row flips, 0 regressions |
+| `multi_step_reasoning.csv` | 27/30, 90.0% | 28/30, 93.3% | rescored with `numeric_final`; one format-insensitive numeric fix |
+
+The arithmetic result is intentionally modest: it mainly validates that semantic numeric scoring prevents formatting artifacts from being mistaken for model failures. Rows with real numeric mistakes, such as `1805` vs `180.5`, still fail.
+
+## Attribution
+
+This project heavily builds on:
+
+```bibtex
+@misc{saravanan2026bankai,
+  title   = {Bankai: Ultra-Sparse Adaptation of 1-Bit LLMs via XOR Patches},
+  author  = {Saravanan, Nikshep},
+  year    = {2026},
+  url     = {https://github.com/nikshepsvn/bankai}
+}
 ```
-
-Larger run:
-
-```bash
-bankai-poc real-shortlist-search gsm8k --model prism-ml/Bonsai-8B-mlx-1bit --rounds 8 --pool 12 --topk 3 --target-probes 8 --control-probes 4
-```
-
-Then validate the saved patch on held-out examples:
-
-```bash
-bankai-poc real-gsm8k-compare --model prism-ml/Bonsai-8B-mlx-1bit --patch gsm8k_real_patch.json --limit 50 --max-tokens 80
-```
-
-## Current Real GSM8K Example
-
-The current shortlist-searched GSM8K patch is stored at [`patches/gsm8k_real_patch.json`](/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/patches/gsm8k_real_patch.json). It contains 3 accepted flips:
-
-- `layer 3 / gate_proj / row 29`
-- `layer 4 / gate_proj / row 43`
-- `layer 3 / up_proj / row 30`
-
-It is still tiny:
-
-- `n_flips`: `3`
-- `bits_flipped`: `12288`
-- `size_bytes`: `36`
-
-The corresponding search trace is in [`results/gsm8k_real_search.json`](/Users/andrewdimarogonas/Desktop/Huxli-parent/Synapse/bankai_poc/results/gsm8k_real_search.json), with final fitness `0.024739583333333336`.
-
-Important caveat: this patch improved the probe objective used during search, but simple arithmetic prompt spot-checks did not yet show visible generation changes. Treat generation-level evaluation as the source of truth.
 
 ## Notes
 

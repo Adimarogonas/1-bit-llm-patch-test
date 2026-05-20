@@ -289,7 +289,16 @@ def run_programmatic_assessment(row: dict[str, Any], prediction: str, expected: 
     elif mode == "contains":
         passed = normalize_label(expected) in normalize_label(prediction)
     elif mode == "regex":
-        passed = re.search(expected, prediction, flags=re.IGNORECASE | re.MULTILINE) is not None
+        passed = regex_prediction_matches(expected, prediction)
+    elif mode in {"numeric_final", "final_numeric", "numeric"}:
+        tolerance = _parse_numeric_tolerance(arg)
+        expected_number = extract_final_number(expected)
+        actual = extract_final_number(prediction)
+        passed = (
+            expected_number is not None
+            and actual is not None
+            and abs(actual - expected_number) <= tolerance
+        )
     elif mode == "json_field":
         field_name = arg or str(row.get("metadata", {}).get("json_field", ""))
         actual = extract_json_field_value(prediction, field_name)
@@ -314,8 +323,87 @@ def run_programmatic_assessment(row: dict[str, Any], prediction: str, expected: 
         "mode": mode,
         "expected": expected,
         "assessment": assessment,
-        **({"actual": actual} if mode == "json_field" else {}),
+        **({"actual": actual} if mode in {"json_field", "numeric_final", "final_numeric", "numeric"} else {}),
+        **({"expected_numeric": expected_number, "tolerance": tolerance} if mode in {"numeric_final", "final_numeric", "numeric"} else {}),
     }
+
+
+def regex_prediction_matches(pattern: str, prediction: str) -> bool:
+    return _regex_search(pattern, prediction) or _regex_search(pattern, normalize_regex_prediction(prediction))
+
+
+def normalize_regex_prediction(prediction: str) -> str:
+    text = prediction or ""
+    text = re.sub(r"[*_`]+", "", text)
+    text = re.sub(r"(?<=\d)\.(?=\s*(?:$|\n))", "", text)
+    return text
+
+
+def regex_representative_completion(pattern: str) -> str:
+    text = pattern or ""
+    text = re.sub(r"\(\?[:=!<][^)]*\)", "", text)
+    text = re.sub(r"\(\?:[^)]*\)\?", "", text)
+    text = re.sub(r"\[[^\]]*\][*+?]?", " ", text)
+    text = re.sub(r"\\s[*+?]?", " ", text)
+    text = re.sub(r"\\[dDwWsS][*+?]?", " ", text)
+    text = re.sub(r"\\([\\.^$|?*+()[\]{}])", r"\1", text)
+    text = re.sub(r"[$^]", "", text)
+    text = re.sub(r"[()?+*{}|]", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text or pattern
+
+
+def _regex_search(pattern: str, prediction: str) -> bool:
+    try:
+        return re.search(pattern, prediction, flags=re.IGNORECASE | re.MULTILINE) is not None
+    except re.error:
+        return False
+
+
+def extract_final_number(text: str) -> float | None:
+    normalized = _normalize_numeric_text(text)
+    answer_matches = list(
+        re.finditer(r"\b(?:final\s+)?answer\s*:\s*([^\n]*)", normalized, flags=re.IGNORECASE)
+    )
+    for match in reversed(answer_matches):
+        number = _last_number(match.group(1))
+        if number is not None:
+            return number
+        following = normalized[match.end() :]
+        next_line = following.splitlines()[0] if following else ""
+        number = _last_number(next_line)
+        if number is not None:
+            return number
+    return _last_number(normalized)
+
+
+def _normalize_numeric_text(text: str) -> str:
+    normalized = re.sub(r"[*_`]+", "", text or "")
+    normalized = normalized.replace("$", "")
+    normalized = normalized.replace(",", "")
+    normalized = re.sub(r"(?<=\d)\.(?=\s*(?:$|\n))", "", normalized)
+    return normalized
+
+
+def _last_number(text: str) -> float | None:
+    matches = list(re.finditer(r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)", text or ""))
+    if not matches:
+        return None
+    value = matches[-1].group(0).rstrip(".")
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def _parse_numeric_tolerance(raw: str) -> float:
+    if not raw:
+        return 1e-6
+    try:
+        tolerance = float(raw)
+    except ValueError:
+        return 1e-6
+    return max(tolerance, 0.0)
 
 
 def score_json_field(prediction: str, expected: str, field_name: str) -> bool:
@@ -327,6 +415,8 @@ def score_expected_json(prediction: str, row: dict[str, Any]) -> dict[str, Any]:
     expected_text = str(row.get("expected_json") or row.get("metadata", {}).get("expected_json") or "").strip()
     expected_payload = parse_json_object_prefix(expected_text)
     actual_payload = parse_json_object_prefix(prediction)
+    strict_fields = _split_metadata_list(row, "strict_fields")
+    soft_fields = set(_split_metadata_list(row, "soft_fields"))
     if expected_payload is None:
         return {
             "passed": False,
@@ -336,6 +426,9 @@ def score_expected_json(prediction: str, row: dict[str, Any]) -> dict[str, Any]:
             "mismatches": [{"path": "$", "expected": "json object", "actual": expected_text}],
         }
     if actual_payload is None:
+        result = _score_truncated_expected_json(prediction, expected_payload, strict_fields, soft_fields)
+        if result is not None:
+            return result
         return {
             "passed": False,
             "reason": "prediction is not a JSON object",
@@ -344,8 +437,6 @@ def score_expected_json(prediction: str, row: dict[str, Any]) -> dict[str, Any]:
             "mismatches": [{"path": "$", "expected": expected_payload, "actual": prediction}],
         }
 
-    strict_fields = _split_metadata_list(row, "strict_fields")
-    soft_fields = set(_split_metadata_list(row, "soft_fields"))
     expected_paths = strict_fields or [path for path, _ in _json_leaf_items(expected_payload)]
     expected_paths = [path for path in expected_paths if path not in soft_fields]
     mismatches: list[dict[str, Any]] = []
@@ -378,6 +469,47 @@ def score_expected_json(prediction: str, row: dict[str, Any]) -> dict[str, Any]:
         "reason": "ok" if not mismatches else "json mismatch",
         "expected_payload": expected_payload,
         "actual_payload": actual_payload,
+        "mismatches": mismatches,
+    }
+
+
+def _score_truncated_expected_json(
+    prediction: str,
+    expected_payload: dict[str, Any],
+    strict_fields: list[str],
+    soft_fields: set[str],
+) -> dict[str, Any] | None:
+    expected_paths = strict_fields or [path for path, _ in _json_leaf_items(expected_payload)]
+    expected_paths = [path for path in expected_paths if path not in soft_fields]
+    if not expected_paths:
+        return None
+
+    mismatches: list[dict[str, Any]] = []
+    extracted: dict[str, Any] = {}
+    for path in expected_paths:
+        expected_value = _json_path_get(expected_payload, path)
+        actual_value = extract_json_field_value(prediction, path)
+        extracted[path] = actual_value
+        if actual_value is None or not _json_values_equal(expected_value, actual_value):
+            mismatches.append({"path": path, "expected": expected_value, "actual": actual_value})
+
+    expected_arguments = expected_payload.get("arguments")
+    if isinstance(expected_arguments, dict):
+        strict_argument_keys = {
+            path.split(".", 1)[1]
+            for path in expected_paths
+            if path.startswith("arguments.") and "." not in path.split(".", 1)[1]
+        }
+        missing_keys = [key for key in strict_argument_keys if extracted.get(f"arguments.{key}") is None]
+        if missing_keys:
+            mismatches.append({"path": "arguments", "missing_keys": sorted(missing_keys)})
+
+    return {
+        "passed": not mismatches,
+        "reason": "ok_truncated_json_fields" if not mismatches else "truncated json mismatch",
+        "expected_payload": expected_payload,
+        "actual_payload": None,
+        "actual_fields": extracted,
         "mismatches": mismatches,
     }
 
@@ -687,6 +819,8 @@ def run_pipeline(config: PipelineConfig, log: LogFn | None = None) -> tuple[Path
                     "reference": row.get("reference", ""),
                     "expected": row.get("expected", row.get("reference", "")),
                     "expected_json": row.get("expected_json", ""),
+                    "strict_fields": row.get("strict_fields", row.get("metadata", {}).get("strict_fields", "")),
+                    "soft_fields": row.get("soft_fields", row.get("metadata", {}).get("soft_fields", "")),
                     "grader": row.get("grader", ""),
                     "prediction": prediction,
                     "error": error,

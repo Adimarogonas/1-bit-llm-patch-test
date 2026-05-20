@@ -1,10 +1,19 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from pathlib import Path
 from typing import Any
 
-from bankai_poc.eval.pipeline import extract_json_field_value, normalize_label, parse_json_object_prefix, read_eval_rows
+from bankai_poc.eval.pipeline import (
+    extract_final_number,
+    extract_json_field_value,
+    normalize_label,
+    normalize_regex_prediction,
+    parse_json_object_prefix,
+    read_eval_rows,
+    regex_representative_completion,
+)
 from bankai_poc.utils.io import load_json, write_jsonl
 
 TOOL_NAMES = [
@@ -16,6 +25,8 @@ TOOL_NAMES = [
     "escalate_ticket",
     "notify",
 ]
+
+NUMERIC_ASSESSMENTS = {"numeric_final", "final_numeric", "numeric"}
 
 
 def build_dynamic_probes_from_details(
@@ -29,20 +40,25 @@ def build_dynamic_probes_from_details(
     details = load_json(details_path)["rows"]
     source_rows = {str(row["id"]): row for row in read_eval_rows(dataset_path)}
     label_set = _label_set(source_rows.values())
+    json_context = _json_probe_context(source_rows.values())
     model_rows = [row for row in details if model_name is None or row["model"] == model_name]
     targets = [row for row in model_rows if row.get("score", {}).get("passed") is False and _has_expected_target(row)]
     controls = [row for row in model_rows if row.get("score", {}).get("passed") is True and _has_expected_target(row)]
+    selected_controls = _select_diverse_rows(controls, source_rows, max_control)
+    selected_control_ids = {str(row.get("id")) for row in selected_controls}
+    validation_candidates = [row for row in controls if str(row.get("id")) not in selected_control_ids]
+    selected_validation = _select_diverse_rows(validation_candidates, source_rows, max(1, max_control // 2))
 
     probes: list[dict[str, Any]] = []
     for row in targets[:max_target]:
         source = source_rows.get(str(row["id"]), {})
-        probes.extend(_probes_for_row(row, source, label_set, "search"))
-    for row in controls[:max_control]:
+        probes.extend(_probes_for_row(row, source, label_set, json_context, "search"))
+    for row in selected_controls:
         source = source_rows.get(str(row["id"]), {})
-        probes.extend(_probes_for_row(row, source, label_set, "control"))
-    for row in controls[max_control : max_control + max(1, max_control // 2)]:
+        probes.extend(_probes_for_row(row, source, label_set, json_context, "control"))
+    for row in selected_validation:
         source = source_rows.get(str(row["id"]), {})
-        probes.extend(_probes_for_row(row, source, label_set, "validation"))
+        probes.extend(_probes_for_row(row, source, label_set, json_context, "validation"))
 
     if not [probe for probe in probes if probe["metadata"]["partition"] == "search"]:
         # If the base model has no failures, use the hardest available controls as a
@@ -50,16 +66,51 @@ def build_dynamic_probes_from_details(
         # failing the adaptation pipeline.
         for row in controls[: min(max_target, len(controls))]:
             source = source_rows.get(str(row["id"]), {})
-            probes.extend(_probes_for_row(row, source, label_set, "search"))
+            probes.extend(_probes_for_row(row, source, label_set, json_context, "search"))
 
     write_jsonl(output_path, probes)
     return output_path
+
+
+def _select_diverse_rows(rows: list[dict[str, Any]], source_rows: dict[str, dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    if limit <= 0:
+        return []
+    buckets: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        source = source_rows.get(str(row.get("id")), {})
+        bucket = _row_diversity_key(row, source)
+        buckets.setdefault(bucket, []).append(row)
+    selected: list[dict[str, Any]] = []
+    while len(selected) < limit and any(buckets.values()):
+        for key in sorted(buckets):
+            bucket_rows = buckets[key]
+            if not bucket_rows:
+                continue
+            selected.append(bucket_rows.pop(0))
+            if len(selected) >= limit:
+                break
+    return selected
+
+
+def _row_diversity_key(row: dict[str, Any], source: dict[str, Any]) -> str:
+    payload = _expected_payload(row) or _expected_payload(source)
+    if payload:
+        name = _json_path_get(payload, "name")
+        if name:
+            return f"name:{name}"
+    assessment = (row.get("score") or {}).get("assessment") or source.get("assessment") or ""
+    return f"assessment:{assessment or row.get('task') or row.get('benchmark') or 'unknown'}"
 
 
 def _label_set(rows: Any) -> list[str]:
     labels: list[str] = []
     for row in rows:
         expected = str(row.get("expected") or row.get("reference") or "").strip()
+        assessment = str(row.get("assessment") or "").strip().lower()
+        if expected and assessment == "regex":
+            expected = regex_representative_completion(expected)
+        elif expected and _assessment_mode(assessment) in NUMERIC_ASSESSMENTS:
+            expected = _numeric_completion(expected) or expected
         if expected and expected not in labels:
             labels.append(expected)
         expected_payload = _expected_payload(row)
@@ -75,14 +126,43 @@ def _has_expected_target(row: dict[str, Any]) -> bool:
     return bool(row.get("expected") or row.get("reference") or row.get("expected_json") or row.get("metadata", {}).get("expected_json"))
 
 
-def _probes_for_row(row: dict[str, Any], source: dict[str, Any], label_set: list[str], partition: str) -> list[dict[str, Any]]:
+def _json_probe_context(rows: Any) -> dict[str, Any]:
+    values_by_path: dict[str, list[str]] = {}
+    argument_keys: list[str] = []
+    for row in rows:
+        payload = _expected_payload(row)
+        if not payload:
+            continue
+        for path, value in _json_leaf_items(payload):
+            text = str(value).strip()
+            if text and text not in values_by_path.setdefault(path, []):
+                values_by_path[path].append(text)
+        arguments = payload.get("arguments")
+        if isinstance(arguments, dict):
+            for key in arguments:
+                if key not in argument_keys:
+                    argument_keys.append(str(key))
+    return {"values_by_path": values_by_path, "argument_keys": argument_keys}
+
+
+def _probes_for_row(
+    row: dict[str, Any],
+    source: dict[str, Any],
+    label_set: list[str],
+    json_context: dict[str, Any],
+    partition: str,
+) -> list[dict[str, Any]]:
     expected = str(row.get("expected") or row.get("reference") or "").strip()
     prediction = str(row.get("prediction") or "")
     assessment = (row.get("score") or {}).get("assessment") or (source or {}).get("assessment") or ""
+    if assessment == "regex":
+        expected = regex_representative_completion(expected)
+    elif _assessment_mode(assessment) in NUMERIC_ASSESSMENTS:
+        expected = _numeric_completion(expected) or expected
     source = source or row
     expected_payload = _expected_payload(row) or _expected_payload(source)
     if expected_payload:
-        targets = _json_structured_targets(source, row, prediction, expected_payload, label_set, partition)
+        targets = _json_structured_targets(source, row, prediction, expected_payload, label_set, json_context, partition)
         if targets:
             return [
                 _make_probe(row, prompt, correct, wrong, partition, target_kind, prediction, label_set)
@@ -131,12 +211,19 @@ def _make_probe(
             "partition": partition,
             "source_row_id": row.get("id"),
             "base_prediction": prediction,
-            "base_score": row.get("score", {}),
+            "base_score": _probe_base_score(row, target_kind, correct),
             "actual_wrong_value": wrong,
             "target_kind": target_kind,
             "label_set": label_set,
         },
     }
+
+
+def _probe_base_score(row: dict[str, Any], target_kind: str, correct: str) -> dict[str, Any]:
+    score = dict(row.get("score", {}))
+    if target_kind == "regex_label" and "expected" in score:
+        score["expected"] = correct
+    return score
 
 
 def _json_control_targets(
@@ -250,20 +337,25 @@ def _json_structured_targets(
     prediction: str,
     expected_payload: dict[str, Any],
     label_set: list[str],
+    json_context: dict[str, Any],
     partition: str,
 ) -> list[tuple[str, str, str, str]]:
     actual_payload = parse_json_object_prefix(prediction) or {}
     targets: list[tuple[str, str, str, str]] = []
+    soft_fields = _metadata_field_set(row, source, "soft_fields")
+    strict_fields = _metadata_field_set(row, source, "strict_fields")
+    values_by_path: dict[str, list[str]] = json_context.get("values_by_path", {})
+    argument_keys: list[str] = json_context.get("argument_keys", [])
 
     expected_name = _json_path_get(expected_payload, "name")
     actual_name = _json_path_get(actual_payload, "name")
     if isinstance(expected_name, str):
         if partition in {"control", "validation"}:
-            wrong_name = _first_different_json_value(label_set, expected_name)
+            wrong_name = _first_other_value(values_by_path.get("name", []), expected_name)
             if wrong_name:
                 targets.append((_probe_prompt(source, '{"name": "'), expected_name, wrong_name, "json_path.name_control"))
         elif actual_name != expected_name:
-            wrong_name = str(actual_name) if actual_name is not None else _first_different_json_value(label_set, expected_name)
+            wrong_name = str(actual_name) if actual_name is not None else _first_other_value(values_by_path.get("name", []), expected_name)
             if wrong_name:
                 targets.append((_probe_prompt(source, '{"name": "'), expected_name, wrong_name, "json_path.name"))
 
@@ -271,9 +363,13 @@ def _json_structured_targets(
     actual_arguments = actual_payload.get("arguments") if isinstance(actual_payload, dict) else None
     if isinstance(expected_arguments, dict):
         actual_arguments = actual_arguments if isinstance(actual_arguments, dict) else {}
-        expected_keys = list(expected_arguments)
+        expected_keys = [
+            str(key)
+            for key in expected_arguments
+            if f"arguments.{key}" not in soft_fields and (not strict_fields or f"arguments.{key}" in strict_fields)
+        ]
         if partition in {"control", "validation"}:
-            wrong_key = _wrong_json_argument_key(expected_arguments, actual_arguments)
+            wrong_key = _wrong_json_argument_key(expected_arguments, actual_arguments) or _first_other_value(argument_keys, expected_keys[0] if expected_keys else "")
         else:
             wrong_key = _wrong_json_argument_key(expected_arguments, actual_arguments)
         if expected_keys and wrong_key:
@@ -289,13 +385,15 @@ def _json_structured_targets(
     for path, expected_value in _json_leaf_items(expected_payload):
         if path == "name":
             continue
+        if path in soft_fields or (strict_fields and path not in strict_fields):
+            continue
         actual_value = _json_path_get(actual_payload, path)
         if partition in {"control", "validation"}:
-            wrong_value = _first_different_json_value(label_set, str(expected_value))
+            wrong_value = _first_other_value(values_by_path.get(path, []), str(expected_value))
         elif _json_values_equal(expected_value, actual_value):
             continue
         else:
-            wrong_value = str(actual_value) if actual_value is not None else _first_different_json_value(label_set, str(expected_value))
+            wrong_value = str(actual_value) if actual_value is not None else _first_other_value(values_by_path.get(path, []), str(expected_value))
         if not wrong_value:
             continue
         prefix = _json_prompt_prefix_for_path(expected_payload, path)
@@ -310,6 +408,13 @@ def _json_structured_targets(
             )
 
     return targets
+
+
+def _metadata_field_set(row: dict[str, Any], source: dict[str, Any], key: str) -> set[str]:
+    value = row.get(key) or row.get("metadata", {}).get(key) or source.get(key) or source.get("metadata", {}).get(key) or ""
+    if isinstance(value, list):
+        return {str(item).strip() for item in value if str(item).strip()}
+    return {part.strip() for part in str(value).split(",") if part.strip()}
 
 
 def _expected_payload(row: dict[str, Any]) -> dict[str, Any] | None:
@@ -348,6 +453,13 @@ def _first_different_json_value(label_set: list[str], expected: str) -> str:
         if label != expected:
             return label
     return _fallback_wrong_label(label_set, expected)
+
+
+def _first_other_value(values: list[str], expected: str) -> str:
+    for value in values:
+        if value != expected:
+            return value
+    return ""
 
 
 def _first_missing_or_changed_key(expected_arguments: dict[str, Any], actual_arguments: dict[str, Any]) -> str:
@@ -396,6 +508,13 @@ def _probe_target(
         target = _json_probe_target(source, row, prediction, expected, field)
         if target is not None:
             return target
+
+    if assessment == "regex":
+        wrong = _regex_wrong_value(prediction, expected) or _fallback_wrong_label(label_set, expected)
+        return _probe_prompt(source, ""), expected, wrong, "regex_label"
+    if _assessment_mode(assessment) in NUMERIC_ASSESSMENTS:
+        wrong = _numeric_wrong_value(prediction, expected) or _fallback_wrong_label(label_set, expected)
+        return _probe_prompt(source, ""), expected, wrong, "numeric_final"
 
     wrong = _wrong_value_for_row(row, prediction, label_set, expected, assessment) or _fallback_wrong_label(label_set, expected)
     return _probe_prompt(source, ""), expected, wrong, "label"
@@ -532,6 +651,10 @@ def _wrong_value_for_row(
     expected: str,
     assessment: str,
 ) -> str | None:
+    if assessment == "regex":
+        return _regex_wrong_value(prediction, expected)
+    if _assessment_mode(assessment) in NUMERIC_ASSESSMENTS:
+        return _numeric_wrong_value(prediction, expected)
     if assessment.startswith("json_field:"):
         field = assessment.split(":", 1)[1]
         value = (row.get("score") or {}).get("actual")
@@ -540,6 +663,60 @@ def _wrong_value_for_row(
         if value is not None and str(value) != expected:
             return str(value)
     return _predicted_label(prediction, label_set, expected)
+
+
+def _assessment_mode(assessment: str) -> str:
+    return (assessment or "").partition(":")[0].strip().lower()
+
+
+def _numeric_completion(text: str) -> str | None:
+    number = extract_final_number(text)
+    return f"{number:g}" if number is not None else None
+
+
+def _numeric_wrong_value(prediction: str, expected: str) -> str | None:
+    actual = _numeric_completion(prediction)
+    expected_number = _numeric_completion(expected) or expected
+    if actual and normalize_label(actual) != normalize_label(expected_number):
+        return actual
+    return None
+
+
+def _regex_wrong_value(prediction: str, expected: str) -> str | None:
+    text = normalize_regex_prediction(prediction)
+    answer = _extract_answer_label_value(text)
+    expected_answer = _extract_answer_label_value(expected) or expected
+    if (
+        answer
+        and normalize_label(answer) != normalize_label(expected)
+        and normalize_label(answer) != normalize_label(expected_answer)
+    ):
+        return answer
+    return None
+
+
+def _extract_answer_label_value(prediction: str) -> str | None:
+    lines = [line.strip() for line in prediction.splitlines()]
+    for index in range(len(lines) - 1, -1, -1):
+        line = lines[index]
+        match = re.search(r"\b(?:final\s+)?answer\s*:\s*(.*)$", line, flags=re.IGNORECASE)
+        if not match:
+            continue
+        value = _clean_answer_value(match.group(1))
+        if value:
+            return value
+        for next_line in lines[index + 1 :]:
+            value = _clean_answer_value(next_line)
+            if value:
+                return value
+    return None
+
+
+def _clean_answer_value(value: str) -> str:
+    text = re.sub(r"[*_`]+", "", value or "").strip()
+    text = re.sub(r"^[#:\-\s]+", "", text).strip()
+    text = re.sub(r"(?<=\d)\.(?=\s*$)", "", text).strip()
+    return text
 
 
 def _predicted_label(prediction: str, label_set: list[str], expected: str) -> str | None:

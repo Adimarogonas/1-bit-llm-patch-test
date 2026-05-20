@@ -1,0 +1,79 @@
+{
+  "dataset_path": "data/practical_evals/multi_step_reasoning.csv",
+  "judge": {
+    "command": "",
+    "mode": "auto",
+    "timeout_s": 180
+  },
+  "max_tokens": 640,
+  "models": [
+    {
+      "command": "",
+      "enabled": true,
+      "kind": "bankai_mlx",
+      "model_ref": "prism-ml/Bonsai-8B-mlx-1bit",
+      "name": "bankai-patched",
+      "patch_path": "results/eval_runs/adaptive_20260520_114039/dynamic_patch.json",
+      "timeout_s": 180
+    },
+    {
+      "command": "",
+      "enabled": true,
+      "kind": "mlx",
+      "model_ref": "prism-ml/Bonsai-8B-mlx-1bit",
+      "name": "bonsai-reference-mlx",
+      "patch_path": null,
+      "timeout_s": 180
+    }
+  ],
+  "summary": [
+    {
+      "accuracy": 0.7333333333333333,
+      "benchmark": "all",
+      "correct": 22,
+      "elapsed_s": 59.63483004199952,
+      "errors": 0,
+      "examples": 30,
+      "kind": "bankai_mlx",
+      "mean_latency_ms": 1987.7022278664906,
+      "model": "bankai-patched",
+      "scored_examples": 30
+    },
+    {
+      "accuracy": 0.7333333333333333,
+      "benchmark": "multi_step_reasoning",
+      "correct": 22,
+      "elapsed_s": 59.63483004199952,
+      "errors": 0,
+      "examples": 30,
+      "kind": "bankai_mlx",
+      "mean_latency_ms": 1987.7022278664906,
+      "model": "bankai-patched",
+      "scored_examples": 30
+    },
+    {
+      "accuracy": 0.7666666666666667,
+      "benchmark": "all",
+      "correct": 23,
+      "elapsed_s": 57.49706733299536,
+      "errors": 0,
+      "examples": 30,
+      "kind": "mlx",
+      "mean_latency_ms": 1916.5254138662324,
+      "model": "bonsai-reference-mlx",
+      "scored_examples": 30
+    },
+    {
+      "accuracy": 0.7666666666666667,
+      "benchmark": "multi_step_reasoning",
+      "correct": 23,
+      "elapsed_s": 57.49706733299536,
+      "errors": 0,
+      "examples": 30,
+      "kind": "mlx",
+      "mean_latency_ms": 1916.5254138662324,
+      "model": "bonsai-reference-mlx",
+      "scored_examples": 30
+    }
+  ]
+}

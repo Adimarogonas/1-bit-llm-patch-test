@@ -1,14 +1,14 @@
-# Patch-Routed Specialization for True 1-Bit LLMs
+# Adaptive Eval and Probe Construction for Bankai-Style 1-Bit LLM Patches
 
-## A Bankai/Bonsai Proof-of-Concept Report
+## A Bankai/Bonsai Proof-of-Concept Report Focused on Evaluation
 
 Date: May 20, 2026
 
 ## Abstract
 
-This project investigates whether a single true 1-bit language model can be specialized at request time using tiny reversible XOR patches. Instead of loading multiple expert models or attaching larger adapters, the system keeps one shared Bonsai 8B base model and applies a small Bankai-style row-XOR patch before inference. The patch can then be reverted exactly or swapped for another patch on the next request.
+This project investigates how to evaluate and guide request-time specialization for a true 1-bit language model using tiny reversible XOR patches. Instead of loading multiple expert models or attaching larger adapters, the system keeps one shared Bonsai 8B base model and applies a small Bankai-style row-XOR patch before inference. The patch can then be reverted exactly or swapped for another patch on the next request.
 
-The current proof of concept validates the core patch mechanics on `prism-ml/Bonsai-8B-mlx-1bit`, but the main technical progress is now probe construction rather than patch mechanics alone. Early GSM8K probes could move logit objectives without reliably moving generation accuracy. The newer adaptive pipeline builds probes from the base model's actual mistakes, targets the first wrong/correct decision boundary, supports multi-token continuations, and adds controls from examples the base model already gets right.
+The patching substrate builds heavily on Nikshep Saravanan's Bankai work on ultra-sparse adaptation of 1-bit LLMs via XOR patches. The current proof of concept validates compatible patch mechanics on `prism-ml/Bonsai-8B-mlx-1bit`, but the main technical progress in this repo is the evaluation and probe-construction pipeline around those patches. Early GSM8K probes could move logit objectives without reliably moving generation accuracy. The newer adaptive pipeline builds probes from the base model's actual mistakes, targets the first wrong/correct decision boundary, supports multi-token continuations, and adds controls from examples the base model already gets right.
 
 On a 70-row `tool_call_selection.csv` evaluation, a 16-flip patch improved accuracy from 62/70 to 66/70, or 88.6% to 94.3%, with zero observed regressions. The result is still narrow and dataset-specific, but it is the first clear sign in this project that boundary-aware dynamic probes can convert XOR row flips into generation-level task improvement.
 
@@ -16,7 +16,7 @@ On a 70-row `tool_call_selection.csv` evaluation, a 16-flip patch improved accur
 
 Large model specialization is usually achieved by storing additional model weights, adapters, LoRA deltas, or separate expert models. That works, but it increases storage, deployment complexity, and sometimes inference overhead.
 
-The Bankai hypothesis is different:
+Bankai's hypothesis is different:
 
 > If the base model is truly 1-bit, then useful behavioral changes may be expressible as small sets of reversible bit flips.
 
@@ -30,6 +30,14 @@ For a 1-bit model, an XOR patch can flip selected packed weight rows. Applying t
 
 This is not a true mixture-of-experts architecture. It is better described as patch-routed specialization or MoE-like specialization behavior with near-zero parameter overhead.
 
+The contribution of this repo is not a new patch format. It is the surrounding machinery needed to tell whether a patch helped for the right reason:
+
+- CSV eval ingestion with reproducible summary and detail artifacts.
+- Semantic scorers for labels, regexes, final numeric answers, JSON fields, and structured JSON calls.
+- Adaptive probes built from base-model failures instead of static benchmark labels.
+- Control probes from base-passing examples to catch regressions.
+- Side-by-side review of fixed, regressed, still-wrong, and still-right cases.
+
 ## 2. System Overview
 
 The proof of concept currently contains:
@@ -39,14 +47,14 @@ The proof of concept currently contains:
 - Probe generation for benchmark-specific supervision.
 - Real MLX/Bonsai model loading through the PrismML MLX fork.
 - Live row-XOR patch application and reversion on packed 1-bit MLP weights.
-- Search runners for greedy search, shortlist search, two-pass shortlist search, and simulated annealing shortlist search.
-- GSM8K generation-level evaluation with base-vs-patched comparison.
-- Adaptive evaluation that runs the base model, extracts failures, builds dynamic probes, searches a patch, and reruns patched evaluation.
+- Search runners for greedy, shortlist, two-pass, and annealing variants. These are treated as interchangeable patch-search backends.
+- Generation-level evaluation with base-vs-patched comparison.
+- Adaptive CSV evaluation that runs the base model, extracts failures, builds dynamic probes, searches a patch, reruns patched evaluation, and stores both example-level details and aggregate summaries.
 - A results UI that reports fixed cases, regressions, still-wrong cases, changed outputs, and side-by-side base/patched generations.
 - Patch checkpointing after every accepted flip so interrupted or failed searches can be recovered.
 - Team runbook commands for distributing heavier patch searches across M3/M4 Apple Silicon machines.
 
-The initial benchmark focus was GSM8K because math-answer correctness is easy to evaluate and explain. The more recent practical focus is tool-call selection because it exposes the exact failure mode that simple probes miss: the model often uses a plausible but wrong function name or argument key.
+The initial benchmark focus was GSM8K because math-answer correctness is easy to evaluate and explain. The more recent practical focus is practical CSV evals, especially tool-call selection and multi-step arithmetic. These expose the two failure modes that motivated the current pipeline: structured outputs often fail at an early schema boundary, while math outputs often look wrong under strict regex matching even when the numeric answer is correct.
 
 ## 3. Model and Patch Format
 
@@ -97,7 +105,7 @@ A 3-flip patch is therefore approximately:
 
 Bankai patch search performs better with probe-style objectives than raw benchmark examples, but the central lesson is that the probe has to match the real failure. A probe that asks "prefer this answer token over that answer token" can improve while the generated answer remains wrong, because the model may be making its first mistake much earlier.
 
-The project now uses two probe families.
+The project now uses three probe families.
 
 ### 4.1 Static Final-Answer Probes
 
@@ -155,13 +163,36 @@ but the expected behavior is:
 
 then optimizing only for the email value is too late. The important mistakes are first the tool boundary, `send_email` vs `escalate_ticket`, and then the argument-key boundary, `to` vs `team`.
 
-### 4.3 Multi-Token Probe Scoring
+### 4.3 Semantic Regex and Numeric Probes
+
+The adaptive pipeline originally treated regex expectations as literal labels. That was a mistake. A row whose expected value was:
+
+```text
+final answer:\s*90(?:\.0+)?(?![\d.])
+```
+
+would produce a probe whose positive completion was the raw regex text, not a natural answer such as:
+
+```text
+final answer: 90
+```
+
+The current probe builder sanitizes regex expectations before probe construction. Search, validation, and control probes now use representative answer text, and their metadata no longer dumps raw regex syntax. This matters because the model should be optimized toward the semantic answer, not toward a grading implementation detail.
+
+For math rows, the preferred assessment mode is now `numeric_final`. It extracts the final answer number, strips currency signs, commas, markdown emphasis, and terminal punctuation, then compares numerically with a configurable tolerance. Dynamic probes for `numeric_final` rows use canonical numeric completions such as `32.2`, `180.5`, or `6.48`.
+
+This distinction avoids two bad outcomes:
+
+- Correct answers such as `Final answer: 90.` or `**450**` are no longer marked wrong because of formatting.
+- Truly wrong answers such as `1805` instead of `180.5` still fail.
+
+### 4.4 Multi-Token Probe Scoring
 
 The scorer now supports multi-token continuations. For dynamic probes, it tokenizes `prompt + correct_completion` and `prompt + wrong_completion`, finds the shared token prefix, and scores the divergent suffixes with teacher-forced mean log probability. This avoids reducing a decision such as `send_email` vs `escalate_ticket` or a multi-token email address to one brittle token.
 
 The same mechanism remains compatible with non-JSON tasks. If the output is not JSON-like, the dynamic builder falls back to a label-style prompt with the expected answer as the correct continuation and the model's actual wrong answer as the negative continuation.
 
-### 4.4 Regression Controls
+### 4.5 Regression Controls
 
 Dynamic probes also include controls from examples the base model already passed. For tool-call selection, controls preserve:
 
@@ -171,78 +202,20 @@ Dynamic probes also include controls from examples the base model already passed
 
 This is why the results UI now separates fixed cases from regressions. A patch that fixes the target class but turns correct `search_orders` calls into repeated `cancel_subscription` calls is not acceptable, even if its raw probe fitness improves.
 
-## 5. Search Algorithms Tested
+## 5. Patch Search as an Adaptation Backend
 
-### 5.1 Greedy Real Search
+Patch search is necessary, but it is no longer the main research object of this repo. The search runners exist to answer a simpler question: given a probe set that reflects actual model mistakes, can small Bankai-style row flips move generation-level behavior without damaging controls?
 
-The simplest search samples a candidate row, flips it, evaluates probe fitness, and keeps it only if it improves the current patch. This is straightforward but expensive and myopic.
+Several search strategies are implemented, and the UI/CLI can choose between them. The important invariant is that every candidate patch is judged against probes derived from the eval pipeline and then promoted only by generation-level base-vs-patched comparison.
 
-Plain-English behavior:
+Implemented search backends include greedy hill climbing, shortlist screening, two-pass shortlist screening, and annealing-style patch-state moves. The exact search strategy is less important than the contract it obeys:
 
-```text
-Try one flip. If it helps immediately, keep it. Otherwise undo it.
-```
+1. Score candidate flips against search probes built from base failures.
+2. Penalize damage to control probes built from base-passing examples.
+3. Checkpoint accepted flips so interrupted runs are recoverable.
+4. Rerun generation and inspect fixed/regressed/still-wrong examples before treating a patch as useful.
 
-This can get stuck because row flips interact. A flip that looks bad alone may be useful with another flip, and a flip that looks good alone may damage generation when stacked with other flips.
-
-### 5.2 Shortlist Search
-
-Shortlist search samples a pool of candidate rows, cheaply screens them on a small probe subset, then fully evaluates only the best-looking finalists.
-
-Plain-English behavior:
-
-```text
-Look at a batch of possible flips cheaply.
-Spend full evaluation only on the best few.
-Keep the best improving candidate.
-```
-
-This was much faster than naive greedy search and produced real non-empty patches.
-
-### 5.3 Two-Pass Shortlist Search
-
-Two-pass search adds a second screening stage:
-
-1. Cheap first pass over a wider pool.
-2. More careful second pass over the best mid-candidates.
-3. Full evaluation over the final top candidates.
-
-This is conceptually sound, but on the 2020 M1 MacBook with 16GB RAM it was too slow for practical iteration using the improved probes.
-
-### 5.4 Simulated Annealing Shortlist Search
-
-The current most promising search variant is simulated annealing over shortlisted candidates. It proposes patch-state moves:
-
-- Add a flip.
-- Remove a flip.
-- Swap one flip for another.
-
-It accepts improvements, and sometimes accepts worse states early in the run. It always saves the best patch state seen.
-
-Plain-English behavior:
-
-```text
-Try messy detours early.
-Allow undoing and swapping flips.
-Gradually become stricter.
-Save the best patch found along the way.
-```
-
-This matters because Bankai row flips are blunt. A row flip changes 4096 packed bits, so the useful unit may be a small combination of flips rather than a single locally optimal flip.
-
-### 5.5 Search Candidate Updates
-
-The current real search now samples from the MLP projections that have actually shown movement in practice:
-
-```text
-gate_proj
-up_proj
-down_proj
-```
-
-Candidate row selection is scale-guided. Instead of taking the first rows in a tensor, the candidate builder ranks rows by scale magnitude and samples from the highest-scale rows in the selected layers. This makes the search budget land on rows that are more likely to move logits.
-
-Every accepted flip is checkpointed to a recoverable patch file. This matters operationally because long MLX searches can fail after finding useful flips; the patch should not be lost because final JSON serialization or a later evaluation step failed.
+This framing deliberately makes search a backend. The research loop starts with eval rows, builds better probes, searches a patch only as a consequence, and then returns to generation-level eval.
 
 ## 6. Layer-Impact Findings
 
@@ -285,9 +258,9 @@ Base Bonsai 8B: 42/50 = 84%
 
 This matters because earlier low GSM8K scores were likely harness artifacts rather than model capability limits.
 
-### 7.2 Earlier Patch Comparison
+### 7.2 Earlier GSM8K Patch Experiments
 
-A 50-example GSM8K comparison with the corrected harness showed:
+Earlier GSM8K patch experiments were useful primarily because they showed what not to trust. A 50-example comparison with the corrected harness showed:
 
 | System | Correct | Accuracy | Delta vs base | Changed generations |
 |---|---:|---:|---:|---:|
@@ -301,49 +274,7 @@ Interpretation:
 - The all-layer/wide patch caused a generation-level regression.
 - This supports the need for safer layer selection and generation-level validation.
 
-### 7.3 Improved-Probe Shortlist Search
-
-A one-pass improved-probe shortlist run found:
-
-```text
-Patch: gsm8k_real_patch_curated_data_v2_pool32_topk2_t6_c3_r3.json
-Search: shortlist
-Rounds: 3
-Pool: 32
-Top-k: 2
-Target probes: 6
-Control probes: 3
-Fitness: 0.009114583333333334
-Flips: 2
-Rows:
-  L12.up_proj[32]
-  L20.up_proj[5]
-Patch size: 24 bytes metadata-excluded
-```
-
-### 7.4 Simulated Annealing Search
-
-A very small annealing run found a higher probe fitness with less search budget:
-
-```text
-Patch: gsm8k_real_patch_anneal_s4_pool4_topk1.json
-Search: simulated annealing shortlist
-Steps: 4
-Pool: 4
-Top-k: 1
-Target probes: 3
-Control probes: 1
-Layers: [1, 4, 8]
-Fitness: 0.015625
-Flips: 3
-Rows:
-  L8.gate_proj[35]
-  L8.gate_proj[29]
-  L8.gate_proj[19]
-Patch size: 36 bytes metadata-excluded
-```
-
-A 50-example GSM8K generation eval for this annealed patch showed:
+Several probe-positive GSM8K patches then failed to improve generation-level accuracy. A representative annealed patch changed generations but left accuracy unchanged:
 
 ```text
 Base:    42/50 = 84%
@@ -355,48 +286,11 @@ Correctness changes: 0
 
 Interpretation:
 
-- The patch changed some generations.
-- It did not improve accuracy.
-- It also did not reproduce the -8% regression seen in the all-layer/wide patch.
+- Probe gains alone were not enough.
+- Generation-level eval had to remain the promotion gate.
+- Search budget was less important than whether the probe represented the actual failure.
 
-### 7.5 Stable Layer-Weighted Annealing
-
-After adding layer profiles and impact weighting, a small stable-profile run found:
-
-```text
-Patch: gsm8k_real_patch_anneal_stable_weighted_s4_pool4_topk1.json
-Search: simulated annealing shortlist
-Steps: 4
-Pool: 4
-Top-k: 1
-Target probes: 3
-Control probes: 1
-Layer profile: stable
-Impact weighted: true
-Fitness: 0.013020833333333334
-Flips: 1
-Row:
-  L20.gate_proj[25]
-Patch size: 12 bytes metadata-excluded
-```
-
-A 20-example GSM8K generation eval showed:
-
-```text
-Base:    15/20 = 75%
-Patched: 15/20 = 75%
-Delta:   0%
-Changed generations: 0
-Correctness changes: 0
-```
-
-Interpretation:
-
-- The stable layer-20 one-flip patch appears highly non-disruptive.
-- At this patch strength, it is behaviorally inert on the first 20 generation examples.
-- This is useful as a safety signal but not yet a performance gain.
-
-### 7.6 Tool-Call Dynamic Probe Search
+### 7.3 Tool-Call Dynamic Probe Search
 
 The most important current result comes from the adaptive tool-call pipeline on `tool_call_selection.csv`.
 
@@ -425,6 +319,23 @@ This is exactly the kind of error the boundary probes were designed to target. T
 
 The same run reported zero regressions. That is important because earlier experimental patches could fix one class of examples while breaking already-correct tool calls, such as replacing `search_orders` with repeated `cancel_subscription` calls or confusing `send_email` with `notify`.
 
+### 7.4 Multi-Step Reasoning Eval Pipeline Check
+
+The `multi_step_reasoning.csv` eval exposed a grading issue rather than a patch-search breakthrough. Under strict regex scoring, correct numeric answers with trailing periods, markdown emphasis, or answer-on-next-line formatting were counted as failures. After adding `numeric_final`, the same stored generations can be scored semantically.
+
+For the `adaptive_20260520_120534` run, rescoring with `numeric_final` gives:
+
+| Metric | Base | Patched |
+|---|---:|---:|
+| Correct | 27/30 | 28/30 |
+| Accuracy | 90.0% | 93.3% |
+| Fixed | n/a | 1 |
+| Regressions | n/a | 0 |
+
+The fixed row is a formatting-insensitive numeric success: the patched model produced `\boxed{32.2}`, which matches the expected `32.20`. The still-wrong rows remain real numeric mistakes: `1805` instead of `180.5`, and `4.32` instead of `6.48`.
+
+This result is important for methodology. It shows why eval scoring must distinguish presentation errors from semantic errors before those examples are converted into probes. Otherwise the search loop optimizes against artifacts of the grader.
+
 ## 8. Key Technical Lessons
 
 ### Probe Formation Is Now the Core Method
@@ -432,6 +343,8 @@ The same run reported zero regressions. That is important because earlier experi
 The main progress came from changing what is optimized, not from making the patch operation more complex. Dynamic probes built from actual base failures are much more useful than generic probes because they target the decision the model really got wrong.
 
 For structured outputs, the correct probe is usually not at the end of the answer. It is at the first divergent structural choice: function name, argument key, or argument value.
+
+For math-like outputs, the correct probe should be the canonical numeric answer, not the raw regex or the surrounding markdown. The scorer and probe builder now share this principle through `numeric_final`.
 
 ### Multi-Token Scoring Is Necessary
 
@@ -441,19 +354,17 @@ Tool names, field names, emails, dates, and many labels are not reliably represe
 
 Several GSM8K patches improved the probe objective without improving generation accuracy. This confirms that generation-level benchmark evaluation must remain the source of truth. The newer tool-call result is encouraging precisely because it improved both the probe objective and the final evaluation.
 
+### Scoring Is Part of the Research System
+
+An eval pipeline can create false failures if it is too strict about formatting. Those false failures then become bad search probes. Adding semantic assessment modes such as `json_match` and `numeric_final` is therefore not cosmetic; it changes what the adaptation loop learns from.
+
 ### Layer Choice Matters
 
 High-impact layers can produce larger probe movement. In the current code, the default search focuses on layers `0-4`, `34`, and `35`, with `gate_proj`, `up_proj`, and `down_proj` enabled. Lower-impact middle layers may still be useful for safer or broader patches, but the tool-call work has benefited from targeting rows with higher measured movement.
 
-### Annealing Looks Promising
+### The Patch Payload Stays Tiny
 
-The small annealing run found 3 flips with higher probe fitness faster than a comparable shortlist strategy. More importantly, it avoided the observed generation-level regression from the broader all-layer patch.
-
-The likely reason is that annealing searches patch states rather than greedily accumulating locally good flips. It can add, remove, and swap rows, which is better aligned with interacting row flips.
-
-### Current Patches Are Extremely Small
-
-The observed real patches are tiny:
+The Bankai substrate remains attractive because the payload being selected by the eval pipeline is extremely small:
 
 | Patch | Flips | Metadata-excluded size |
 |---|---:|---:|
@@ -475,6 +386,7 @@ Known limitations:
 - Tool-call improvement is currently demonstrated on one 70-row dataset and needs replication on larger held-out sets.
 - Dynamic JSON probes depend on being able to parse expected and generated structured outputs.
 - Boundary probes are task-specific; every schema needs careful failure analysis.
+- Numeric-final scoring handles scalar numeric answers but not symbolic equivalence, units, intervals, or multi-answer math.
 - Runs on the 2020 M1 MacBook are slow, limiting search depth.
 - Search trajectories are sensitive to probe selection, layer selection, and budget.
 - Two-pass shortlist search is currently too slow on the M1 with improved probes.
@@ -487,6 +399,7 @@ Recommended next work:
 
 - Build larger held-out tool-call datasets so the 16-flip improvement can be checked for generalization.
 - Add more structured-output probe builders for non-tool JSON schemas.
+- Add more semantic assessment modes before treating eval failures as adaptation targets.
 - Continue targeting first divergent boundaries: tool name, argument key, argument value, and first semantically wrong free-text span.
 - Compare row-level search against smaller group-level flips once the probe objective is stable.
 - Run ablations for layer sets `[0-4, 34, 35]`, `[17-21]`, and mixed early/final profiles.
@@ -519,8 +432,19 @@ The current proof of concept validates the mechanical foundation of patch-routed
 - Patch artifacts are extremely small.
 - Probe-driven search can find non-empty patches and, on the current tool-call evaluation, produce a measured generation-level improvement.
 - Dynamic boundary probes are the key practical advance: build them from actual base failures and optimize the first wrong/correct decision.
+- Semantic scoring is part of probe quality: raw regexes and formatting-sensitive math failures should not become adaptation targets.
 - Multi-token continuation scoring is necessary for structured outputs.
-- Simulated annealing over shortlist candidates can find compact, non-destructive patches faster than purely greedy accumulation.
 - Generation-level evaluation is essential because probe gains alone are not enough.
 
 The main open question is no longer just whether XOR patches can move behavior. They can. The sharper question is whether dynamically generated, boundary-aware probes can make those changes reliable across larger held-out datasets and broader task families. The current tool-call result is the strongest evidence so far that this direction is viable.
+
+## References
+
+```bibtex
+@misc{saravanan2026bankai,
+  title   = {Bankai: Ultra-Sparse Adaptation of 1-Bit LLMs via XOR Patches},
+  author  = {Saravanan, Nikshep},
+  year    = {2026},
+  url     = {https://github.com/nikshepsvn/bankai}
+}
+```
