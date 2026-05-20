@@ -1,0 +1,112 @@
+{
+  "base_model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "description": "Checkpoint for dynamic practical-eval Bankai greedy patch for tool_call_selection.",
+  "flips": [
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 4312
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 5930
+    },
+    {
+      "layer": 2,
+      "proj": "down_proj",
+      "row": 2421
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 3992
+    },
+    {
+      "layer": 1,
+      "proj": "down_proj",
+      "row": 971
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 1801
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 3822
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 7268
+    },
+    {
+      "layer": 0,
+      "proj": "down_proj",
+      "row": 1838
+    },
+    {
+      "layer": 35,
+      "proj": "up_proj",
+      "row": 10482
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 822
+    },
+    {
+      "layer": 1,
+      "proj": "up_proj",
+      "row": 6213
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 7164
+    },
+    {
+      "layer": 3,
+      "proj": "down_proj",
+      "row": 1622
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 10219
+    },
+    {
+      "layer": 2,
+      "proj": "down_proj",
+      "row": 233
+    }
+  ],
+  "format": "bankai_row_xor_v1",
+  "metadata": {
+    "checkpoint": true,
+    "final_fitness": 1.2529296875,
+    "impact_weighted": true,
+    "layer_profile": "stable",
+    "search_algorithm": "dynamic_real_greedy_screened_mean",
+    "search_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      34,
+      35
+    ],
+    "step": 50,
+    "task": "tool_call_selection"
+  },
+  "name": "tool_call_selection_dynamic_greedy_patch",
+  "stats": {
+    "bits_flipped": 65536,
+    "n_flips": 16,
+    "size_bytes": 192
+  },
+  "version": 1
+}

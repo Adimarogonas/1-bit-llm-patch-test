@@ -1,0 +1,407 @@
+{
+  "base_model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "description": "Dynamic practical-eval Bankai greedy patch for tool_call_selection.",
+  "flips": [
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 4312
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 5930
+    },
+    {
+      "layer": 2,
+      "proj": "down_proj",
+      "row": 2421
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 3992
+    },
+    {
+      "layer": 1,
+      "proj": "down_proj",
+      "row": 971
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 1801
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 3822
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 7268
+    },
+    {
+      "layer": 0,
+      "proj": "down_proj",
+      "row": 1838
+    },
+    {
+      "layer": 35,
+      "proj": "up_proj",
+      "row": 10482
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 822
+    },
+    {
+      "layer": 1,
+      "proj": "up_proj",
+      "row": 6213
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 7164
+    },
+    {
+      "layer": 3,
+      "proj": "down_proj",
+      "row": 1622
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 10219
+    },
+    {
+      "layer": 2,
+      "proj": "down_proj",
+      "row": 233
+    }
+  ],
+  "format": "bankai_row_xor_v1",
+  "metadata": {
+    "benchmark": "tool_call_selection",
+    "candidate_rows": 48,
+    "control_penalty": 2.0,
+    "control_probe_count": 6,
+    "final_fitness": 1.2529296875,
+    "fitness_mode": "mean",
+    "impact_weighted": true,
+    "layer_profile": "stable",
+    "max_flips": 16,
+    "max_iters": 200,
+    "model_summary": {
+      "candidates": [
+        {
+          "has_scales": true,
+          "path": "model.layers.0.mlp.gate_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.0.mlp.up_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.0.mlp.down_proj",
+          "scales_shape": [
+            4096,
+            96
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            4096,
+            384
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.1.mlp.gate_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.1.mlp.up_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.1.mlp.down_proj",
+          "scales_shape": [
+            4096,
+            96
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            4096,
+            384
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.2.mlp.gate_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.2.mlp.up_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.2.mlp.down_proj",
+          "scales_shape": [
+            4096,
+            96
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            4096,
+            384
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.3.mlp.gate_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.3.mlp.up_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.3.mlp.down_proj",
+          "scales_shape": [
+            4096,
+            96
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            4096,
+            384
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.4.mlp.gate_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.4.mlp.up_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.4.mlp.down_proj",
+          "scales_shape": [
+            4096,
+            96
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            4096,
+            384
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.34.mlp.gate_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.34.mlp.up_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.34.mlp.down_proj",
+          "scales_shape": [
+            4096,
+            96
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            4096,
+            384
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.35.mlp.gate_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.35.mlp.up_proj",
+          "scales_shape": [
+            12288,
+            32
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            12288,
+            128
+          ]
+        },
+        {
+          "has_scales": true,
+          "path": "model.layers.35.mlp.down_proj",
+          "scales_shape": [
+            4096,
+            96
+          ],
+          "weight_dtype": "mlx.core.uint32",
+          "weight_shape": [
+            4096,
+            384
+          ]
+        }
+      ],
+      "patchable": true
+    },
+    "screen_probes": [
+      "51::search::json_tool_name",
+      "49::search::json_tool_name"
+    ],
+    "screened_out": 4,
+    "search_algorithm": "dynamic_real_greedy_screened_mean",
+    "search_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      34,
+      35
+    ],
+    "search_projs": [
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "target_probe_count": 8,
+    "task": "tool_call_selection",
+    "validation_probe_count": 4
+  },
+  "name": "tool_call_selection_dynamic_greedy_patch",
+  "stats": {
+    "bits_flipped": 65536,
+    "n_flips": 16,
+    "size_bytes": 192
+  },
+  "version": 1
+}

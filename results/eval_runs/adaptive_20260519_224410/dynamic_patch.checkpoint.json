@@ -1,0 +1,47 @@
+{
+  "base_model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "description": "Checkpoint for dynamic practical-eval Bankai patch for tool_call_selection.",
+  "flips": [
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 822
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 8453
+    },
+    {
+      "layer": 4,
+      "proj": "up_proj",
+      "row": 12011
+    }
+  ],
+  "format": "bankai_row_xor_v1",
+  "metadata": {
+    "checkpoint": true,
+    "final_fitness": 0.3024088541666667,
+    "impact_weighted": true,
+    "layer_profile": "stable",
+    "round": 2,
+    "search_algorithm": "dynamic_real_shortlist_search",
+    "search_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      34,
+      35
+    ],
+    "task": "tool_call_selection"
+  },
+  "name": "tool_call_selection_dynamic_patch",
+  "stats": {
+    "bits_flipped": 12288,
+    "n_flips": 3,
+    "size_bytes": 36
+  },
+  "version": 1
+}

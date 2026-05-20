@@ -1,0 +1,19 @@
+{
+  "base_details": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260519_174825/base/details.json",
+  "base_summary": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260519_174825/base/summary.json",
+  "best_probe_score": 0.20160929361979166,
+  "candidate_rows": 96,
+  "changed_generations": 7,
+  "control_penalty": 2.0,
+  "dataset_path": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/data/practical_evals/tool_call_selection.csv",
+  "dynamic_probes": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260519_174825/dynamic_probes.jsonl",
+  "impact_weighted": true,
+  "layer_profile": "balanced",
+  "max_flips": 32,
+  "model_ref": "prism-ml/Bonsai-8B-mlx-1bit",
+  "patch": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260519_174825/dynamic_patch.json",
+  "patch_flips": 26,
+  "patched_details": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260519_174825/patched/details.json",
+  "patched_summary": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260519_174825/patched/summary.json",
+  "run_dir": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260519_174825"
+}

@@ -9,8 +9,8 @@ search:
   iterations: 24
   candidate_rows: 48
   max_flips: 16
-  search_layers: [1, 2, 3, 4, 34]
-  search_projs: ["gate_proj", "up_proj"]
+  search_layers: [0, 1, 2, 3, 4, 34, 35]
+  search_projs: ["gate_proj", "up_proj", "down_proj"]
   control_penalty: 2.0
 probe:
   type: compliance_pair

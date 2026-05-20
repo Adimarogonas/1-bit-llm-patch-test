@@ -1,0 +1,112 @@
+{
+  "base_model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "description": "Checkpoint for dynamic practical-eval Bankai greedy patch for tool_call_selection.",
+  "flips": [
+    {
+      "layer": 3,
+      "proj": "up_proj",
+      "row": 4183
+    },
+    {
+      "layer": 34,
+      "proj": "gate_proj",
+      "row": 1369
+    },
+    {
+      "layer": 2,
+      "proj": "up_proj",
+      "row": 2380
+    },
+    {
+      "layer": 0,
+      "proj": "up_proj",
+      "row": 7188
+    },
+    {
+      "layer": 1,
+      "proj": "gate_proj",
+      "row": 4586
+    },
+    {
+      "layer": 0,
+      "proj": "gate_proj",
+      "row": 810
+    },
+    {
+      "layer": 35,
+      "proj": "up_proj",
+      "row": 5009
+    },
+    {
+      "layer": 0,
+      "proj": "down_proj",
+      "row": 3314
+    },
+    {
+      "layer": 2,
+      "proj": "gate_proj",
+      "row": 6660
+    },
+    {
+      "layer": 3,
+      "proj": "up_proj",
+      "row": 2431
+    },
+    {
+      "layer": 2,
+      "proj": "up_proj",
+      "row": 9431
+    },
+    {
+      "layer": 1,
+      "proj": "down_proj",
+      "row": 1838
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 822
+    },
+    {
+      "layer": 4,
+      "proj": "up_proj",
+      "row": 12011
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 6129
+    },
+    {
+      "layer": 3,
+      "proj": "gate_proj",
+      "row": 9097
+    }
+  ],
+  "format": "bankai_row_xor_v1",
+  "metadata": {
+    "checkpoint": true,
+    "final_fitness": 0.8854166666666666,
+    "impact_weighted": true,
+    "layer_profile": "stable",
+    "search_algorithm": "dynamic_real_greedy_screened_mean",
+    "search_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      34,
+      35
+    ],
+    "step": 82,
+    "task": "tool_call_selection"
+  },
+  "name": "tool_call_selection_dynamic_greedy_patch",
+  "stats": {
+    "bits_flipped": 65536,
+    "n_flips": 16,
+    "size_bytes": 192
+  },
+  "version": 1
+}

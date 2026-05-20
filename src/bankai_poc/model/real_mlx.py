@@ -30,8 +30,8 @@ def get_module(model: Any, path: str) -> Any:
 
 def model_patchable_summary(model: Any) -> dict[str, Any]:
     candidates = []
-    for layer in [1, 2, 3, 4, 34]:
-        for proj in ["gate_proj", "up_proj"]:
+    for layer in [0, 1, 2, 3, 4, 34, 35]:
+        for proj in ["gate_proj", "up_proj", "down_proj"]:
             path = f"model.layers.{layer}.mlp.{proj}"
             try:
                 mod = get_module(model, path)

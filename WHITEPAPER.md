@@ -2,13 +2,15 @@
 
 ## A Bankai/Bonsai Proof-of-Concept Report
 
-Date: April 14, 2026
+Date: May 20, 2026
 
 ## Abstract
 
 This project investigates whether a single true 1-bit language model can be specialized at request time using tiny reversible XOR patches. Instead of loading multiple expert models or attaching larger adapters, the system keeps one shared Bonsai 8B base model and applies a small Bankai-style row-XOR patch before inference. The patch can then be reverted exactly or swapped for another patch on the next request.
 
-The current proof of concept validates the core patch mechanics on `prism-ml/Bonsai-8B-mlx-1bit`, implements benchmark-specific probe generation, and explores several patch-search strategies for GSM8K. The early result is not yet benchmark improvement, but it shows that real reversible 1-bit row patches can be found, applied, reverted, and evaluated with negligible storage overhead. Simulated annealing over shortlist candidates currently looks more promising than purely greedy search because it can find compact, non-destructive patches faster.
+The current proof of concept validates the core patch mechanics on `prism-ml/Bonsai-8B-mlx-1bit`, but the main technical progress is now probe construction rather than patch mechanics alone. Early GSM8K probes could move logit objectives without reliably moving generation accuracy. The newer adaptive pipeline builds probes from the base model's actual mistakes, targets the first wrong/correct decision boundary, supports multi-token continuations, and adds controls from examples the base model already gets right.
+
+On a 70-row `tool_call_selection.csv` evaluation, a 16-flip patch improved accuracy from 62/70 to 66/70, or 88.6% to 94.3%, with zero observed regressions. The result is still narrow and dataset-specific, but it is the first clear sign in this project that boundary-aware dynamic probes can convert XOR row flips into generation-level task improvement.
 
 ## 1. Motivation
 
@@ -39,9 +41,12 @@ The proof of concept currently contains:
 - Live row-XOR patch application and reversion on packed 1-bit MLP weights.
 - Search runners for greedy search, shortlist search, two-pass shortlist search, and simulated annealing shortlist search.
 - GSM8K generation-level evaluation with base-vs-patched comparison.
+- Adaptive evaluation that runs the base model, extracts failures, builds dynamic probes, searches a patch, and reruns patched evaluation.
+- A results UI that reports fixed cases, regressions, still-wrong cases, changed outputs, and side-by-side base/patched generations.
+- Patch checkpointing after every accepted flip so interrupted or failed searches can be recovered.
 - Team runbook commands for distributing heavier patch searches across M3/M4 Apple Silicon machines.
 
-The initial benchmark focus is GSM8K because math-answer correctness is easy to evaluate and explain.
+The initial benchmark focus was GSM8K because math-answer correctness is easy to evaluate and explain. The more recent practical focus is tool-call selection because it exposes the exact failure mode that simple probes miss: the model often uses a plausible but wrong function name or argument key.
 
 ## 3. Model and Patch Format
 
@@ -90,7 +95,13 @@ A 3-flip patch is therefore approximately:
 
 ## 4. Probe Construction
 
-Bankai patch search performs better with probe-style objectives than raw benchmark examples. For GSM8K, the project moved from simple answer-token probes to stronger final-answer probes:
+Bankai patch search performs better with probe-style objectives than raw benchmark examples, but the central lesson is that the probe has to match the real failure. A probe that asks "prefer this answer token over that answer token" can improve while the generated answer remains wrong, because the model may be making its first mistake much earlier.
+
+The project now uses two probe families.
+
+### 4.1 Static Final-Answer Probes
+
+For GSM8K, the project moved from simple answer-token probes to stronger final-answer probes:
 
 - Normalize GSM8K examples into prompt, rationale, full answer, and parsed answer value.
 - Build prompts that include teacher-forced reasoning and end at `Final answer: `.
@@ -107,6 +118,58 @@ control: 475
 ```
 
 The key improvement was separating target, validation, and control probes so search fitness does not only optimize the same examples used for sanity checking.
+
+These probes were useful for validating the pipeline, but they did not reliably improve generation-level GSM8K accuracy.
+
+### 4.2 Dynamic Boundary Probes
+
+The newer adaptive pipeline builds probes from the base model's own outputs:
+
+1. Run the base model on the evaluation set.
+2. Identify rows that failed and rows that passed.
+3. Parse the expected answer and the base prediction.
+4. Build search probes from failures.
+5. Build validation and control probes from held-out failures and successful base cases.
+6. Search for a patch.
+7. Rerun evaluation with the patch and compare base vs patched generations.
+
+For JSON-like tool calls, the probe builder targets the earliest decision boundary that explains the mistake:
+
+| Failure type | Probe prompt ends at | Correct continuation | Wrong continuation |
+|---|---|---|---|
+| Wrong tool | `{"name": "` | correct tool name | base model's wrong tool name |
+| Wrong argument key | `{"name": "<tool>", "arguments": {"` | correct key, such as `to` | wrong key, such as `team` |
+| Wrong argument value | field prefix after the correct key | expected value | base model's wrong value |
+
+This matters for tool-use tasks. If the base model emits:
+
+```json
+{"name": "escalate_ticket", "arguments": {"team": "billing-team@vendor.com"}}
+```
+
+but the expected behavior is:
+
+```json
+{"name": "send_email", "arguments": {"to": "billing-team@vendor.com"}}
+```
+
+then optimizing only for the email value is too late. The important mistakes are first the tool boundary, `send_email` vs `escalate_ticket`, and then the argument-key boundary, `to` vs `team`.
+
+### 4.3 Multi-Token Probe Scoring
+
+The scorer now supports multi-token continuations. For dynamic probes, it tokenizes `prompt + correct_completion` and `prompt + wrong_completion`, finds the shared token prefix, and scores the divergent suffixes with teacher-forced mean log probability. This avoids reducing a decision such as `send_email` vs `escalate_ticket` or a multi-token email address to one brittle token.
+
+The same mechanism remains compatible with non-JSON tasks. If the output is not JSON-like, the dynamic builder falls back to a label-style prompt with the expected answer as the correct continuation and the model's actual wrong answer as the negative continuation.
+
+### 4.4 Regression Controls
+
+Dynamic probes also include controls from examples the base model already passed. For tool-call selection, controls preserve:
+
+- Tool names, such as `search_orders` vs `cancel_subscription`.
+- Tool aliases that are easy to confuse, such as `send_email` vs `notify`.
+- Argument keys and values already produced correctly.
+
+This is why the results UI now separates fixed cases from regressions. A patch that fixes the target class but turns correct `search_orders` calls into repeated `cancel_subscription` calls is not acceptable, even if its raw probe fitness improves.
 
 ## 5. Search Algorithms Tested
 
@@ -167,6 +230,20 @@ Save the best patch found along the way.
 
 This matters because Bankai row flips are blunt. A row flip changes 4096 packed bits, so the useful unit may be a small combination of flips rather than a single locally optimal flip.
 
+### 5.5 Search Candidate Updates
+
+The current real search now samples from the MLP projections that have actually shown movement in practice:
+
+```text
+gate_proj
+up_proj
+down_proj
+```
+
+Candidate row selection is scale-guided. Instead of taking the first rows in a tensor, the candidate builder ranks rows by scale magnitude and samples from the highest-scale rows in the selected layers. This makes the search budget land on rows that are more likely to move logits.
+
+Every accepted flip is checkpointed to a recoverable patch file. This matters operationally because long MLX searches can fail after finding useful flips; the patch should not be lost because final JSON serialization or a later evaluation step failed.
+
 ## 6. Layer-Impact Findings
 
 A layer-level probe sweep measured average absolute logit-gap changes across 8 probes:
@@ -183,18 +260,18 @@ A layer-level probe sweep measured average absolute logit-gap changes across 8 p
 Based on this, the search code now supports layer profiles:
 
 ```text
-stable:     [8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28]
-balanced:   [5, 8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32, 35]
-aggressive: [1, 2, 3, 4, 8, 12, 16, 20, 24, 28, 32, 34, 35]
+stable:     [0, 1, 2, 3, 4, 34, 35]
+balanced:   [0, 1, 2, 3, 4, 22, 24, 28, 32, 34, 35]
+aggressive: [0, 1, 2, 3, 4, 8, 12, 16, 20, 24, 28, 32, 34, 35]
 ```
 
-The GSM8K default was changed away from the old high-impact default `[1, 2, 3, 4, 34]` and toward a lower-regression set:
+The current default is the high-impact set:
 
 ```text
-[8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32]
+[0, 1, 2, 3, 4, 34, 35]
 ```
 
-Search can also use impact-weighted sampling, which downweights high-impact layers when drawing candidate rows.
+The app also exposes a custom layer selector so a run can focus on a hand-picked set without changing code. This became important because the best layer set appears task-dependent: GSM8K safety runs tolerated lower-impact layers, while tool-call selection responded strongly to early layers and final layers.
 
 ## 7. Experiments and Results So Far
 
@@ -319,15 +396,54 @@ Interpretation:
 - At this patch strength, it is behaviorally inert on the first 20 generation examples.
 - This is useful as a safety signal but not yet a performance gain.
 
+### 7.6 Tool-Call Dynamic Probe Search
+
+The most important current result comes from the adaptive tool-call pipeline on `tool_call_selection.csv`.
+
+| Metric | Base | Patched |
+|---|---:|---:|
+| Correct | 62/70 | 66/70 |
+| Accuracy | 88.6% | 94.3% |
+| Delta | n/a | +4 rows, +5.7 points |
+| Regressions | n/a | 0 |
+| Changed outputs | n/a | 26 |
+| Patch size | n/a | 16 row flips |
+| Probe score | n/a | 1.2529 |
+
+The fixed examples share a pattern. The base model often chose `escalate_ticket` and placed an email address under `arguments.team`; the patched model chose `send_email` and placed the same contact under `arguments.to`.
+
+Representative fixed cases:
+
+| Row | Base behavior | Patched behavior |
+|---:|---|---|
+| 35 | `escalate_ticket`, `team: billing-team@vendor.com` | `send_email`, `to: billing-team@vendor.com` |
+| 52 | `escalate_ticket`, `team: support-eng@vendor.io` | `send_email`, `to: support-eng@vendor.io` |
+| 56 | `escalate_ticket`, `team: product-team@startup.io` | `send_email`, `to: product-team@startup.io` |
+| 62 | `escalate_ticket`, `team: engineering-leads@startup.io` | `send_email`, `to: engineering-leads@startup.io` |
+
+This is exactly the kind of error the boundary probes were designed to target. The patch is not merely increasing the probability of a final email string; it is moving earlier structural choices: tool name first, then argument key.
+
+The same run reported zero regressions. That is important because earlier experimental patches could fix one class of examples while breaking already-correct tool calls, such as replacing `search_orders` with repeated `cancel_subscription` calls or confusing `send_email` with `notify`.
+
 ## 8. Key Technical Lessons
+
+### Probe Formation Is Now the Core Method
+
+The main progress came from changing what is optimized, not from making the patch operation more complex. Dynamic probes built from actual base failures are much more useful than generic probes because they target the decision the model really got wrong.
+
+For structured outputs, the correct probe is usually not at the end of the answer. It is at the first divergent structural choice: function name, argument key, or argument value.
+
+### Multi-Token Scoring Is Necessary
+
+Tool names, field names, emails, dates, and many labels are not reliably represented by one token. Scoring the divergent multi-token suffix makes the objective closer to the generated behavior while still staying much cheaper than full generation inside the search loop.
 
 ### Probe Fitness Does Not Guarantee Generation Gains
 
-Several patches improved the probe objective without improving GSM8K generation accuracy. This confirms that generation-level benchmark evaluation must remain the source of truth.
+Several GSM8K patches improved the probe objective without improving generation accuracy. This confirms that generation-level benchmark evaluation must remain the source of truth. The newer tool-call result is encouraging precisely because it improved both the probe objective and the final evaluation.
 
 ### Layer Choice Matters
 
-High-impact layers can produce larger probe movement but appear more likely to disrupt generation. Lower-impact middle layers may be safer but may need larger or better-directed searches to produce visible behavior changes.
+High-impact layers can produce larger probe movement. In the current code, the default search focuses on layers `0-4`, `34`, and `35`, with `gate_proj`, `up_proj`, and `down_proj` enabled. Lower-impact middle layers may still be useful for safer or broader patches, but the tool-call work has benefited from targeting rows with higher measured movement.
 
 ### Annealing Looks Promising
 
@@ -345,67 +461,44 @@ The observed real patches are tiny:
 | Improved-probe shortlist | 2 | 24 bytes |
 | Small anneal | 3 | 36 bytes |
 | Curated shortlist | 5 | 60 bytes |
+| Tool-call dynamic probe patch | 16 | 192 bytes |
 
 Even if JSON metadata is much larger than the compact representation, the underlying patch payload is negligible relative to an 8B model.
 
 ## 9. Current Limitations
 
-This work does not yet prove benchmark improvement. Current evidence supports feasibility of reversible patching and search infrastructure, not final task gains.
+This work now shows a narrow generation-level improvement on one practical tool-call dataset, but it does not yet prove broad benchmark improvement. Current evidence supports feasibility of reversible patching, dynamic probe construction, and targeted task gains under controlled evaluation.
 
 Known limitations:
 
-- GSM8K is the only benchmark with meaningful generation-level evaluation so far.
-- Probe improvements have not yet translated into generation accuracy gains.
+- GSM8K patches have not yet translated probe gains into generation accuracy gains.
+- Tool-call improvement is currently demonstrated on one 70-row dataset and needs replication on larger held-out sets.
+- Dynamic JSON probes depend on being able to parse expected and generated structured outputs.
+- Boundary probes are task-specific; every schema needs careful failure analysis.
 - Runs on the 2020 M1 MacBook are slow, limiting search depth.
-- The best current stable patch is non-disruptive but also behaviorally inert on 20 examples.
 - Search trajectories are sensitive to probe selection, layer selection, and budget.
 - Two-pass shortlist search is currently too slow on the M1 with improved probes.
 
 ## 10. Near-Term Plan
 
-The immediate next step is distributed search on newer M3/M4 MacBooks using the team runbook.
+The immediate next step is to deepen the dynamic-probe path rather than only increasing GSM8K search budget.
 
-Recommended heavy run:
+Recommended next work:
 
-```bash
-PYTHONUNBUFFERED=1 bankai-poc real-anneal-shortlist-search gsm8k \
-  --model prism-ml/Bonsai-8B-mlx-1bit \
-  --steps 32 --pool 16 --topk 3 \
-  --target-probes 8 --control-probes 4 \
-  --layer-profile stable --impact-weighted \
-  --start-temp 0.03 --end-temp 0.0008 \
-  --output patches/gsm8k_real_patch_anneal_stable_s32_pool16_topk3.json
-```
-
-Recommended very heavy follow-up:
-
-```bash
-PYTHONUNBUFFERED=1 bankai-poc real-anneal-shortlist-search gsm8k \
-  --model prism-ml/Bonsai-8B-mlx-1bit \
-  --steps 72 --pool 32 --topk 4 \
-  --target-probes 12 --control-probes 6 \
-  --layer-profile balanced --impact-weighted \
-  --start-temp 0.04 --end-temp 0.0005 \
-  --output patches/gsm8k_real_patch_anneal_balanced_s72_pool32_topk4.json
-```
-
-Every candidate patch should then be tested with:
-
-```bash
-PYTHONUNBUFFERED=1 bankai-poc real-gsm8k-compare \
-  --model prism-ml/Bonsai-8B-mlx-1bit \
-  --patch <patch-name>.json \
-  --limit 50 \
-  --max-tokens 400
-```
+- Build larger held-out tool-call datasets so the 16-flip improvement can be checked for generalization.
+- Add more structured-output probe builders for non-tool JSON schemas.
+- Continue targeting first divergent boundaries: tool name, argument key, argument value, and first semantically wrong free-text span.
+- Compare row-level search against smaller group-level flips once the probe objective is stable.
+- Run ablations for layer sets `[0-4, 34, 35]`, `[17-21]`, and mixed early/final profiles.
+- Keep generation-level comparison as the promotion gate, with fixed/regression/still-wrong reporting in the UI.
 
 Promotion criteria for a patch:
 
-- Improves or preserves 50-example GSM8K accuracy.
-- Produces visible generation changes.
-- Does not increase truncation or formatting failures.
-- Has positive probe fitness on target probes.
-- Does not show excessive validation/control degradation.
+- Improves final task accuracy on held-out evaluation rows.
+- Produces zero or very few regressions on base-passing rows.
+- Fixes mistakes for the expected reason, visible in side-by-side generations.
+- Has positive probe fitness on target probes and non-negative control movement.
+- Remains small enough to preserve the Bankai deployment story.
 
 ## 11. Longer-Term Research Direction
 
@@ -424,9 +517,10 @@ The current proof of concept validates the mechanical foundation of patch-routed
 
 - Real packed row-XOR patches can be applied and reverted.
 - Patch artifacts are extremely small.
-- Probe-driven search can find non-empty patches.
+- Probe-driven search can find non-empty patches and, on the current tool-call evaluation, produce a measured generation-level improvement.
+- Dynamic boundary probes are the key practical advance: build them from actual base failures and optimize the first wrong/correct decision.
+- Multi-token continuation scoring is necessary for structured outputs.
 - Simulated annealing over shortlist candidates can find compact, non-destructive patches faster than purely greedy accumulation.
 - Generation-level evaluation is essential because probe gains alone are not enough.
 
-The main open question remains whether deeper searches on faster machines can convert probe-level improvements into reliable benchmark-level gains. The infrastructure is now in place to test that question across GSM8K, HumanEval+, IFEval, and BFCL.
-
+The main open question is no longer just whether XOR patches can move behavior. They can. The sharper question is whether dynamically generated, boundary-aware probes can make those changes reliable across larger held-out datasets and broader task families. The current tool-call result is the strongest evidence so far that this direction is viable.
