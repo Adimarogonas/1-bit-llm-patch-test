@@ -92,9 +92,96 @@ bankai-poc route
 bankai-poc plots
 ```
 
+## Eval Studio
+
+This repo includes an Electron UI that treats the Python package as a sidecar. The default research direction is now practical CSV evals: sentiment analysis, classification, routing, summarization, extraction, and similar product-facing tasks. The app can normalize CSV datasets, run the three-way comparison, stream CLI logs, configure an optional command-based LLM judge, and inspect saved summaries/details under `results/eval_runs`.
+
+```bash
+cd /Users/andrewdimarogonas/Desktop/Personal\ Projects/bankai_poc/electron
+yarn install
+yarn start
+```
+
+The app launches the sidecar with:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m bankai_poc.cli eval-dataset ...
+PYTHONPATH=src .venv/bin/python -m bankai_poc.cli eval-run ...
+```
+
+The default comparison slots are:
+
+- patched Bankai MLX: `prism-ml/Bonsai-8B-mlx-1bit` plus a Bankai patch JSON
+- reference Bonsai MLX: configurable; default is `prism-ml/Bonsai-8B-unpacked` until you point it at the 8-bit MLX repo you want to use
+- terminal agent: configurable command; the rendered prompt is sent on stdin unless the command contains `{prompt}`
+
+CSV evals need at minimum:
+
+- `prompt`
+- `expected` or `grader`
+
+Use `expected` for programmatic label/answer matching. Use `grader` for natural-language judge instructions, then configure a judge command. If both `expected` and `grader` are present, `expected` wins by default. Optional useful columns are `id`, `system`, `assessment`, `segment`, `category`, and `difficulty`.
+
+Programmatic assessment modes:
+
+- `exact_normalized`: default for `expected`; lowercase, trim, and collapse whitespace
+- `classification` or `routing`: aliases for `exact_normalized`
+- `exact`: trimmed raw equality
+- `contains`: normalized prediction contains normalized expected
+- `regex`: expected is a case-insensitive regex
+- `json_field:<field>`: parse prediction as JSON and compare a field or dotted path
+- `llm_judge`: explicitly use the configured judge command
+
+CLI-only equivalent:
+
+```bash
+bankai-poc eval-dataset \
+  --csv-source data/practical_evals/example_sentiment.csv \
+  --task-name sentiment_analysis \
+  --limit 20 \
+  --output data/practical_evals/sentiment_analysis.jsonl
+
+bankai-poc eval-run \
+  --dataset data/practical_evals/sentiment_analysis.jsonl \
+  --output-dir results/eval_runs/run_latest \
+  --bankai-model prism-ml/Bonsai-8B-mlx-1bit \
+  --bankai-patch patches/gsm8k_real_patch.json \
+  --reference-model prism-ml/Bonsai-8B-unpacked \
+  --agent-command "codex exec --model gpt-5.4-mini"
+```
+
+LLM-judged rows pass this JSON payload to the judge command on stdin:
+
+```json
+{"prompt": "...", "expected": "", "prediction": "...", "grader": "Pass if ...", "metadata": {}}
+```
+
+Preferred judge output:
+
+```json
+{"passed": true, "score": 1.0, "reason": "Short explanation."}
+```
+
+Reusable command notes live in `.agents/commands/`.
+
+Adaptive eval mode:
+
+```bash
+bankai-poc eval-adapt \
+  --dataset data/practical_evals/example_routing.csv \
+  --model prism-ml/Bonsai-8B-mlx-1bit \
+  --output-dir results/eval_runs \
+  --search-mode greedy \
+  --max-iters 600 \
+  --fitness-mode mean \
+  --accept-per-round 2
+```
+
+This runs the base model first, builds dynamic probes from failed rows, uses passing rows as controls, searches a patch, and re-runs the same CSV with the patch applied. The Electron app exposes this as the main non-technical workflow with native file pickers. Use `--search-mode shortlist` for the batched shortlist search, or `--search-mode greedy` for screened greedy hill climbing. In greedy mode, `--candidate-rows 0` searches every row in each selected layer/projection.
+
 ## Recommended Real Search Flow
 
-For Apple Silicon machines, prefer shortlist search over naive greedy search. It screens a small candidate pool cheaply, then fully evaluates only the top candidates each round.
+For smaller Apple Silicon machines, shortlist search is still the fastest option. On larger machines, the adaptive eval flow can use screened greedy search to try more rows and keep every flip that improves probe fitness.
 
 Smoke run:
 

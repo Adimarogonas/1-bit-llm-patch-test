@@ -1,0 +1,4 @@
+id,prompt,expected,grader,assessment,system,segment
+1,"Classify the sentiment of this review as positive, negative, or neutral. Return only the label: The setup was fast and the results were accurate.",positive,,classification,"You are a precise sentiment classifier. Return only one label: positive, negative, or neutral.",sentiment
+2,"Classify the sentiment of this review as positive, negative, or neutral. Return only the label: The app crashed twice and support never replied.",negative,,classification,"You are a precise sentiment classifier. Return only one label: positive, negative, or neutral.",sentiment
+3,"Classify the sentiment of this review as positive, negative, or neutral. Return only the label: It installed successfully but I have not used it yet.",neutral,,classification,"You are a precise sentiment classifier. Return only one label: positive, negative, or neutral.",sentiment

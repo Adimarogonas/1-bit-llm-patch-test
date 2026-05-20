@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 src/*.egg-info/
 src/bankai_poc.egg-info/
+electron/node_modules/
+electron/yarn-error.log

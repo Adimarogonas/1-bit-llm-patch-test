@@ -1,0 +1,67 @@
+{
+  "rows": [
+    {
+      "benchmark": "example_sentiment",
+      "error": null,
+      "expected": "positive",
+      "grader": "",
+      "id": "1",
+      "latency_ms": 316.86891600020317,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "positive",
+      "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Return only the label: The setup was fast and the results were accurate.",
+      "reference": "positive",
+      "score": {
+        "assessment": "classification",
+        "expected": "positive",
+        "mode": "classification",
+        "passed": true,
+        "score": 1.0
+      },
+      "task": "example_sentiment"
+    },
+    {
+      "benchmark": "example_sentiment",
+      "error": null,
+      "expected": "negative",
+      "grader": "",
+      "id": "2",
+      "latency_ms": 243.13708299996506,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "negative",
+      "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Return only the label: The app crashed twice and support never replied.",
+      "reference": "negative",
+      "score": {
+        "assessment": "classification",
+        "expected": "negative",
+        "mode": "classification",
+        "passed": true,
+        "score": 1.0
+      },
+      "task": "example_sentiment"
+    },
+    {
+      "benchmark": "example_sentiment",
+      "error": null,
+      "expected": "neutral",
+      "grader": "",
+      "id": "3",
+      "latency_ms": 318.4475829993971,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "neutral",
+      "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Return only the label: It installed successfully but I have not used it yet.",
+      "reference": "neutral",
+      "score": {
+        "assessment": "classification",
+        "expected": "neutral",
+        "mode": "classification",
+        "passed": true,
+        "score": 1.0
+      },
+      "task": "example_sentiment"
+    }
+  ]
+}

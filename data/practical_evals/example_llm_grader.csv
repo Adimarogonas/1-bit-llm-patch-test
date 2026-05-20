@@ -1,0 +1,2 @@
+id,prompt,expected,grader,assessment,system,task_type
+1,"Summarize this customer issue in one sentence: The customer says they cannot log in after resetting their password and the reset email sometimes arrives 20 minutes late.",,"Pass if the answer is one sentence, mentions login failure, and mentions delayed password reset email. Fail if it invents unrelated details.",llm_judge,"You summarize customer support issues accurately and concisely.",summarization

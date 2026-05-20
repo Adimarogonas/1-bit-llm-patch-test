@@ -1,0 +1,97 @@
+{
+  "best_score": 0.0,
+  "created_at_ms": 1779227176436,
+  "mode": "dynamic_shortlist",
+  "patch_path": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/results/eval_runs/adaptive_20260519_144501/dynamic_patch.json",
+  "task": "sentiment_customer_reviews",
+  "trajectory": [
+    {
+      "accepted": false,
+      "candidate_score": -0.004720052083333333,
+      "layer": 17,
+      "proj": "up_proj",
+      "round": 0,
+      "row": 39,
+      "scale_mean": 0.0875244140625,
+      "screen_gain": 0.001953125,
+      "validation_gain": -0.0013020833333333333
+    },
+    {
+      "accepted": false,
+      "candidate_score": -0.00341796875,
+      "layer": 28,
+      "proj": "gate_proj",
+      "round": 0,
+      "row": 8,
+      "scale_mean": 0.08758544921875,
+      "screen_gain": 0.001953125,
+      "validation_gain": 0.0026041666666666665
+    },
+    {
+      "accepted": false,
+      "candidate_score": -0.0016276041666666665,
+      "layer": 17,
+      "proj": "up_proj",
+      "round": 1,
+      "row": 42,
+      "scale_mean": 0.08612060546875,
+      "screen_gain": 0.005859375,
+      "validation_gain": 0.0026041666666666665
+    },
+    {
+      "accepted": false,
+      "candidate_score": -0.00927734375,
+      "layer": 18,
+      "proj": "up_proj",
+      "round": 1,
+      "row": 4,
+      "scale_mean": 0.0908203125,
+      "screen_gain": 0.005859375,
+      "validation_gain": 0.0
+    },
+    {
+      "accepted": false,
+      "candidate_score": -0.01025390625,
+      "layer": 32,
+      "proj": "gate_proj",
+      "round": 2,
+      "row": 29,
+      "scale_mean": 0.0849609375,
+      "screen_gain": 0.00390625,
+      "validation_gain": -0.0013020833333333333
+    },
+    {
+      "accepted": false,
+      "candidate_score": -0.008626302083333334,
+      "layer": 12,
+      "proj": "up_proj",
+      "round": 2,
+      "row": 4,
+      "scale_mean": 0.0787353515625,
+      "screen_gain": 0.0,
+      "validation_gain": -0.0026041666666666665
+    },
+    {
+      "accepted": false,
+      "candidate_score": -0.006022135416666666,
+      "layer": 20,
+      "proj": "gate_proj",
+      "round": 3,
+      "row": 35,
+      "scale_mean": 0.07940673828125,
+      "screen_gain": 0.001953125,
+      "validation_gain": 0.0
+    },
+    {
+      "accepted": false,
+      "candidate_score": -0.016764322916666668,
+      "layer": 18,
+      "proj": "up_proj",
+      "round": 3,
+      "row": 2,
+      "scale_mean": 0.0965576171875,
+      "screen_gain": 0.001953125,
+      "validation_gain": -0.0013020833333333333
+    }
+  ]
+}

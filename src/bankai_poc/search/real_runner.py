@@ -10,14 +10,18 @@ import numpy as np
 from bankai_poc.data.registry import config_path, patch_path, probes_path
 from bankai_poc.model.patching import BankaiPatch, PatchFlip, save_patch
 from bankai_poc.model.real_mlx import apply_real_patch, flip_row, get_module, load_real_model, model_patchable_summary
+from bankai_poc.search.probe_eval import compute_fitness, compute_fitness_min
 from bankai_poc.utils.artifacts import save_run_manifest
 from bankai_poc.utils.io import load_yaml, read_jsonl
 
 
+DEFAULT_SEARCH_LAYERS: list[int] = [0, 1, 2, 3, 4, 34, 35]
+DEFAULT_SEARCH_PROJS: list[str] = ["gate_proj", "up_proj", "down_proj"]
+
 LAYER_PROFILES: dict[str, list[int]] = {
-    "stable": [8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28],
-    "balanced": [5, 8, 12, 16, 17, 18, 19, 20, 21, 22, 24, 28, 32, 35],
-    "aggressive": [1, 2, 3, 4, 8, 12, 16, 20, 24, 28, 32, 34, 35],
+    "stable": DEFAULT_SEARCH_LAYERS,
+    "balanced": [0, 1, 2, 3, 4, 22, 24, 28, 32, 34, 35],
+    "aggressive": [0, 1, 2, 3, 4, 8, 12, 16, 20, 24, 28, 32, 34, 35],
 }
 
 LAYER_IMPACT: dict[int, float] = {
@@ -29,6 +33,16 @@ LAYER_IMPACT: dict[int, float] = {
     35: 3.2,
 }
 
+DEFAULT_DYNAMIC_SEARCH_CONFIG: dict[str, Any] = {
+    "search": {
+        "candidate_rows": 48,
+        "max_flips": 16,
+        "search_layers": DEFAULT_SEARCH_LAYERS,
+        "search_projs": DEFAULT_SEARCH_PROJS,
+        "control_penalty": 2.0,
+    }
+}
+
 
 @dataclass
 class RealSearchResult:
@@ -37,24 +51,91 @@ class RealSearchResult:
     trajectory: list[dict[str, Any]]
 
 
-def _pre_tokenize(tokenizer: Any, probes: list[dict[str, Any]]) -> list[tuple[mx.array, int, int]]:
+PackedProbe = tuple[mx.array, tuple[int, ...], tuple[int, ...]]
+
+
+def _pre_tokenize(tokenizer: Any, probes: list[dict[str, Any]]) -> list[PackedProbe]:
     packed = []
     for probe in probes:
-        tokens = mx.array(tokenizer.encode(probe["prompt"]))
-        correct_id = tokenizer.encode(probe["correct_token"])[-1]
-        wrong_id = tokenizer.encode(probe["wrong_token"])[-1]
-        packed.append((tokens, correct_id, wrong_id))
+        prompt = probe["prompt"]
+        prompt_ids = tokenizer.encode(prompt)
+        correct_completion = probe.get("correct_completion")
+        wrong_completion = probe.get("wrong_completion")
+        if correct_completion is not None and wrong_completion is not None:
+            prefix_ids, correct_ids, wrong_ids = _divergent_token_suffixes(
+                tokenizer,
+                prompt,
+                str(correct_completion),
+                str(wrong_completion),
+            )
+            tokens = mx.array(prefix_ids)
+        else:
+            tokens = mx.array(prompt_ids)
+            correct_ids = tuple(tokenizer.encode(probe["correct_token"])[:1])
+            wrong_ids = tuple(tokenizer.encode(probe["wrong_token"])[:1])
+        packed.append((tokens, tuple(correct_ids), tuple(wrong_ids)))
     return packed
 
 
-def _measure_fast(model: Any, packed: list[tuple[mx.array, int, int]], names: list[str]) -> dict[str, float]:
+def _divergent_token_suffixes(
+    tokenizer: Any,
+    prompt: str,
+    correct_completion: str,
+    wrong_completion: str,
+) -> tuple[list[int], tuple[int, ...], tuple[int, ...]]:
+    prompt_ids = tokenizer.encode(prompt)
+    correct_ids = _continuation_ids(tokenizer, prompt, correct_completion, prompt_ids)
+    wrong_ids = _continuation_ids(tokenizer, prompt, wrong_completion, prompt_ids)
+    if not correct_ids:
+        correct_ids = tokenizer.encode(correct_completion)
+    if not wrong_ids:
+        wrong_ids = tokenizer.encode(wrong_completion)
+
+    common = 0
+    while common < min(len(correct_ids), len(wrong_ids)) and correct_ids[common] == wrong_ids[common]:
+        common += 1
+    if common >= len(correct_ids) or common >= len(wrong_ids):
+        common = 0
+    return prompt_ids + correct_ids[:common], tuple(correct_ids[common:]), tuple(wrong_ids[common:])
+
+
+def _continuation_ids(tokenizer: Any, prompt: str, completion: str, prompt_ids: list[int]) -> list[int]:
+    combined_ids = tokenizer.encode(prompt + completion)
+    if combined_ids[: len(prompt_ids)] == prompt_ids:
+        return combined_ids[len(prompt_ids) :]
+    return tokenizer.encode(completion)
+
+
+def _measure_fast(model: Any, packed: list[PackedProbe], names: list[str]) -> dict[str, float]:
     gaps: dict[str, float] = {}
-    for (tokens, correct_id, wrong_id), name in zip(packed, names):
-        logits = model(tokens[None, :])
-        last = logits[0, -1, :]
-        mx.eval(last)
-        gaps[name] = float(last[correct_id].item() - last[wrong_id].item())
+    for (tokens, correct_ids, wrong_ids), name in zip(packed, names):
+        correct_score = _sequence_mean_logprob(model, tokens, correct_ids)
+        wrong_score = _sequence_mean_logprob(model, tokens, wrong_ids)
+        gaps[name] = correct_score - wrong_score
     return gaps
+
+
+def _sequence_mean_logprob(model: Any, prefix_tokens: mx.array, continuation_ids: tuple[int, ...]) -> float:
+    if not continuation_ids:
+        return 0.0
+    if len(continuation_ids) == 1:
+        logits = model(prefix_tokens[None, :])
+        last = logits[0, -1, :]
+        log_probs = last - mx.logsumexp(last, axis=-1)
+        mx.eval(log_probs)
+        return float(log_probs[continuation_ids[0]].item())
+
+    continuation = mx.array(continuation_ids[:-1])
+    tokens = mx.concatenate([prefix_tokens, continuation], axis=0)
+    logits = model(tokens[None, :])
+    start = int(prefix_tokens.shape[0]) - 1
+    selected = logits[0, start : start + len(continuation_ids), :]
+    log_probs = selected - mx.logsumexp(selected, axis=-1, keepdims=True)
+    mx.eval(log_probs)
+    total = 0.0
+    for index, token_id in enumerate(continuation_ids):
+        total += float(log_probs[index, token_id].item())
+    return total / len(continuation_ids)
 
 
 def _fitness(
@@ -64,9 +145,17 @@ def _fitness(
     control_baseline: dict[str, float],
     penalty: float,
 ) -> float:
-    target_improvement = sum(target_gaps[n] - target_baseline[n] for n in target_baseline) / len(target_baseline)
-    control_degradation = sum(max(0.0, control_baseline[n] - control_gaps[n]) for n in control_baseline) / max(1, len(control_baseline))
-    return target_improvement - penalty * control_degradation
+    return compute_fitness(target_gaps, control_gaps, target_baseline, control_baseline, penalty)
+
+
+def _fitness_min(
+    target_gaps: dict[str, float],
+    control_gaps: dict[str, float],
+    target_baseline: dict[str, float],
+    control_baseline: dict[str, float],
+    penalty: float,
+) -> float:
+    return compute_fitness_min(target_gaps, control_gaps, target_baseline, control_baseline, penalty)
 
 
 def _mean_gain(gaps: dict[str, float], baseline: dict[str, float]) -> float:
@@ -133,8 +222,14 @@ def _build_candidates(
         for proj in search_projs:
             mod = get_module(model, f"model.layers.{layer}.mlp.{proj}")
             row_scales = np.array(mx.mean(mx.abs(mod.scales), axis=1))
-            for row in range(min(candidate_rows, mod.weight.shape[0])):
-                candidates.append((layer, proj, row, float(row_scales[row])))
+            if candidate_rows <= 0:
+                rows = np.arange(mod.weight.shape[0])
+            else:
+                row_limit = min(candidate_rows, mod.weight.shape[0])
+                rows = np.argsort(row_scales)[-row_limit:][::-1]
+            for row in rows:
+                row_index = int(row)
+                candidates.append((int(layer), proj, row_index, float(row_scales[row_index])))
     return candidates
 
 
@@ -205,6 +300,25 @@ def _candidate_to_flip(candidate: tuple[int, str, int, float]) -> PatchFlip:
 
 def _flip_key(flip: PatchFlip) -> tuple[int, str, int]:
     return (flip.layer, flip.proj, flip.row)
+
+
+def _save_patch_checkpoint(
+    output_path: Path,
+    name: str,
+    description: str,
+    model_ref: str,
+    accepted: list[PatchFlip],
+    metadata: dict[str, Any],
+) -> None:
+    checkpoint_path = output_path.with_name(f"{output_path.stem}.checkpoint.json")
+    checkpoint = BankaiPatch(
+        name=name,
+        description=description,
+        base_model=model_ref,
+        flips=list(accepted),
+        metadata={**metadata, "checkpoint": True},
+    )
+    save_patch(checkpoint_path, checkpoint)
 
 
 def run_real_search(benchmark: str, model_ref: str, output_path: Path | None = None, max_iters: int | None = None) -> RealSearchResult:
@@ -513,6 +627,484 @@ def run_real_shortlist_search(
             "best_score": current_fitness,
             "trajectory": trajectory,
             "mode": "shortlist",
+        },
+    )
+    return RealSearchResult(patch=patch, best_score=current_fitness, trajectory=trajectory)
+
+
+def run_real_shortlist_search_from_probes(
+    task_name: str,
+    model_ref: str,
+    probes: list[dict[str, Any]],
+    output_path: Path,
+    rounds: int = 4,
+    shortlist_pool: int = 8,
+    shortlist_topk: int = 2,
+    accept_per_round: int = 1,
+    max_target_probes: int = 12,
+    max_control_probes: int = 6,
+    candidate_rows: int = 48,
+    max_flips: int = 16,
+    control_penalty: float = 2.0,
+    search_layers: list[int] | None = None,
+    layer_profile: str | None = None,
+    impact_weighted: bool = True,
+    verbose: bool = True,
+) -> RealSearchResult:
+    config = {
+        "search": {
+            **DEFAULT_DYNAMIC_SEARCH_CONFIG["search"],
+            "candidate_rows": candidate_rows,
+            "max_flips": max_flips,
+            "control_penalty": control_penalty,
+            "accept_per_round": max(1, accept_per_round),
+        }
+    }
+    if verbose:
+        print(f"loading model for dynamic patch search: {model_ref}", flush=True)
+    handle = load_real_model(model_ref)
+    if verbose:
+        print("model loaded; checking patchable MLX row layout", flush=True)
+    summary = model_patchable_summary(handle.model)
+    if not summary["patchable"]:
+        raise RuntimeError("Loaded model does not expose Bankai-compatible uint32 row-packed MLP weights.")
+
+    if verbose:
+        print(f"partitioning {len(probes)} dynamic probes", flush=True)
+    target_probes, control_probes, validation_probes = _select_probe_partitions(probes, max_target_probes, max_control_probes)
+    if verbose:
+        print("tokenizing dynamic probes", flush=True)
+    packed_target = _pre_tokenize(handle.tokenizer, target_probes)
+    packed_control = _pre_tokenize(handle.tokenizer, control_probes)
+    packed_validation = _pre_tokenize(handle.tokenizer, validation_probes)
+    target_names = [probe["name"] for probe in target_probes]
+    control_names = [probe["name"] for probe in control_probes]
+    validation_names = [probe["name"] for probe in validation_probes]
+
+    if verbose:
+        print("measuring baseline logit gaps for target/control/validation probes", flush=True)
+    target_baseline = _measure_fast(handle.model, packed_target, target_names)
+    control_baseline = _measure_fast(handle.model, packed_control, control_names)
+    validation_baseline = _measure_fast(handle.model, packed_validation, validation_names)
+
+    active_layers = _resolve_search_layers(config, search_layers, layer_profile)
+    if verbose:
+        print(f"building row-flip candidates from layers={active_layers}", flush=True)
+    candidates = _build_candidates(handle.model, active_layers, config["search"]["search_projs"], config["search"]["candidate_rows"])
+    candidate_weights = _candidate_weights(candidates, impact_weighted=impact_weighted)
+    rng = np.random.default_rng(abs(hash((task_name, "dynamic-shortlist"))) & 0xFFFFFFFF)
+
+    screen_names = [name for name, _ in sorted(target_baseline.items(), key=lambda kv: kv[1])[: min(2, len(target_baseline))]]
+    screen_indices = [target_names.index(name) for name in screen_names]
+    screen_packed = [packed_target[i] for i in screen_indices]
+
+    accepted: list[PatchFlip] = []
+    tried: set[tuple[int, str, int]] = set()
+    trajectory: list[dict[str, Any]] = []
+    current_fitness = 0.0
+    accept_limit = config["search"]["accept_per_round"]
+
+    if verbose:
+        print(
+            f"dynamic-shortlist-search task={task_name} target_probes={len(target_probes)} "
+            f"control_probes={len(control_probes)} validation_probes={len(validation_probes)} "
+            f"rounds={rounds} pool={shortlist_pool} topk={shortlist_topk} accept_per_round={accept_limit} "
+            f"candidate_rows={candidate_rows} max_flips={max_flips} candidates={len(candidates)} "
+            f"control_penalty={control_penalty}",
+            flush=True,
+        )
+
+    for round_idx in range(rounds):
+        pool = _sample_pool(candidates, candidate_weights, rng, tried, shortlist_pool)
+        if not pool:
+            break
+
+        screened: list[tuple[float, tuple[int, str, int, float]]] = []
+        for layer, proj, row, scale in pool:
+            flip_row(handle.model, layer, proj, row)
+            mx.eval(handle.model.parameters())
+            screen_gaps = _measure_fast(handle.model, screen_packed, screen_names)
+            screen_gain = sum(screen_gaps[name] - target_baseline[name] for name in screen_names) / len(screen_names)
+            flip_row(handle.model, layer, proj, row)
+            screened.append((screen_gain, (layer, proj, row, scale)))
+
+        screened.sort(key=lambda item: item[0], reverse=True)
+        finalists = screened[: min(shortlist_topk, len(screened))]
+        if verbose:
+            best_screen_gain = finalists[0][0] if finalists else float("-inf")
+            print(f"[round {round_idx+1}/{rounds}] screened {len(pool)} candidates best_screen_gain={best_screen_gain:+.6f}", flush=True)
+
+        remaining_finalists = list(finalists)
+        accepted_this_round = 0
+        while (
+            remaining_finalists
+            and accepted_this_round < accept_limit
+            and len(accepted) < config["search"]["max_flips"]
+        ):
+            best_eval: dict[str, Any] | None = None
+            rescored: list[dict[str, Any]] = []
+            for screen_gain, (layer, proj, row, scale) in remaining_finalists:
+                flip_row(handle.model, layer, proj, row)
+                mx.eval(handle.model.parameters())
+                target_gaps = _measure_fast(handle.model, packed_target, target_names)
+                control_gaps = _measure_fast(handle.model, packed_control, control_names)
+                validation_gaps = _measure_fast(handle.model, packed_validation, validation_names)
+                fitness = _fitness(target_gaps, control_gaps, target_baseline, control_baseline, config["search"]["control_penalty"])
+                validation_gain = _mean_gain(validation_gaps, validation_baseline)
+                flip_row(handle.model, layer, proj, row)
+
+                candidate_eval = {
+                    "round": round_idx,
+                    "accept_slot": accepted_this_round,
+                    "layer": layer,
+                    "proj": proj,
+                    "row": row,
+                    "scale_mean": scale,
+                    "screen_gain": screen_gain,
+                    "candidate_score": fitness,
+                    "validation_gain": validation_gain,
+                    "accepted": False,
+                }
+                rescored.append(candidate_eval)
+                if fitness > current_fitness and (best_eval is None or fitness > best_eval["candidate_score"]):
+                    best_eval = candidate_eval
+
+            if best_eval is None:
+                trajectory.extend(rescored)
+                for candidate_eval in rescored:
+                    if verbose:
+                        print(
+                            f"  reject L{candidate_eval['layer']}.{candidate_eval['proj']}[{candidate_eval['row']}] "
+                            f"scale={candidate_eval['scale_mean']:.6f} "
+                            f"screen={candidate_eval['screen_gain']:+.6f} "
+                            f"fitness={candidate_eval['candidate_score']:+.6f}",
+                            flush=True,
+                        )
+                break
+
+            best_eval["accepted"] = True
+            trajectory.extend(rescored)
+            for candidate_eval in rescored:
+                if verbose:
+                    state = "ACCEPT-CANDIDATE" if candidate_eval is best_eval else "reject"
+                    print(
+                        f"  {state} L{candidate_eval['layer']}.{candidate_eval['proj']}[{candidate_eval['row']}] "
+                        f"scale={candidate_eval['scale_mean']:.6f} "
+                        f"screen={candidate_eval['screen_gain']:+.6f} "
+                        f"fitness={candidate_eval['candidate_score']:+.6f}",
+                        flush=True,
+                    )
+
+            layer = best_eval["layer"]
+            proj = best_eval["proj"]
+            row = best_eval["row"]
+            flip_row(handle.model, layer, proj, row)
+            mx.eval(handle.model.parameters())
+            accepted.append(PatchFlip(layer=layer, proj=proj, row=row))
+            _save_patch_checkpoint(
+                output_path,
+                f"{task_name}_dynamic_patch",
+                f"Checkpoint for dynamic practical-eval Bankai patch for {task_name}.",
+                model_ref,
+                accepted,
+                {
+                    "task": task_name,
+                    "search_algorithm": "dynamic_real_shortlist_search",
+                    "search_layers": active_layers,
+                    "layer_profile": layer_profile,
+                    "impact_weighted": impact_weighted,
+                    "final_fitness": best_eval["candidate_score"],
+                    "round": round_idx,
+                },
+            )
+            current_fitness = best_eval["candidate_score"]
+            accepted_this_round += 1
+            remaining_finalists = [
+                item for item in remaining_finalists if item[1][:3] != (layer, proj, row)
+            ]
+            if verbose:
+                print(
+                    f"[round {round_idx+1}/{rounds}] ACCEPTED L{layer}.{proj}[{row}] "
+                    f"fitness={current_fitness:+.6f} accepted_this_round={accepted_this_round}/{accept_limit} "
+                    f"flips={len(accepted)}/{max_flips}",
+                    flush=True,
+                )
+
+        if accepted_this_round == 0 and verbose:
+            print(f"[round {round_idx+1}/{rounds}] no improving candidate", flush=True)
+
+    patch = BankaiPatch(
+        name=f"{task_name}_dynamic_patch",
+        description=f"Dynamic practical-eval Bankai patch for {task_name}.",
+        base_model=model_ref,
+        flips=accepted,
+        metadata={
+            "benchmark": task_name,
+            "task": task_name,
+            "search_algorithm": "dynamic_real_shortlist_search",
+            "search_layers": active_layers,
+            "layer_profile": layer_profile,
+            "impact_weighted": impact_weighted,
+            "search_projs": config["search"]["search_projs"],
+            "control_penalty": config["search"]["control_penalty"],
+            "final_fitness": current_fitness,
+            "candidate_rows": candidate_rows,
+            "max_flips": max_flips,
+            "target_probe_count": len(target_probes),
+            "control_probe_count": len(control_probes),
+            "validation_probe_count": len(validation_probes),
+            "rounds": rounds,
+            "shortlist_pool": shortlist_pool,
+            "shortlist_topk": shortlist_topk,
+            "accept_per_round": accept_limit,
+            "model_summary": summary,
+        },
+    )
+    save_patch(output_path, patch)
+    save_run_manifest(
+        output_path.with_name("dynamic_search.json"),
+        {
+            "task": task_name,
+            "patch_path": str(output_path),
+            "best_score": current_fitness,
+            "trajectory": trajectory,
+            "mode": "dynamic_shortlist",
+            "accept_per_round": accept_limit,
+        },
+    )
+    return RealSearchResult(patch=patch, best_score=current_fitness, trajectory=trajectory)
+
+
+def run_real_greedy_search_from_probes(
+    task_name: str,
+    model_ref: str,
+    probes: list[dict[str, Any]],
+    output_path: Path,
+    max_iters: int = 200,
+    fitness_mode: str = "mean",
+    max_target_probes: int = 12,
+    max_control_probes: int = 6,
+    candidate_rows: int = 48,
+    max_flips: int = 16,
+    control_penalty: float = 2.0,
+    search_layers: list[int] | None = None,
+    layer_profile: str | None = None,
+    impact_weighted: bool = True,
+    verbose: bool = True,
+) -> RealSearchResult:
+    if fitness_mode not in {"mean", "min"}:
+        raise ValueError("fitness_mode must be 'mean' or 'min'")
+
+    config = {
+        "search": {
+            **DEFAULT_DYNAMIC_SEARCH_CONFIG["search"],
+            "candidate_rows": candidate_rows,
+            "max_flips": max_flips,
+            "control_penalty": control_penalty,
+        }
+    }
+    if verbose:
+        print(f"loading model for dynamic greedy patch search: {model_ref}", flush=True)
+    handle = load_real_model(model_ref)
+    if verbose:
+        print("model loaded; checking patchable MLX row layout", flush=True)
+    summary = model_patchable_summary(handle.model)
+    if not summary["patchable"]:
+        raise RuntimeError("Loaded model does not expose Bankai-compatible uint32 row-packed MLP weights.")
+
+    if verbose:
+        print(f"partitioning {len(probes)} dynamic probes", flush=True)
+    target_probes, control_probes, validation_probes = _select_probe_partitions(probes, max_target_probes, max_control_probes)
+    if not target_probes:
+        raise RuntimeError("Greedy search needs at least one target probe.")
+
+    if verbose:
+        print("tokenizing dynamic probes", flush=True)
+    packed_target = _pre_tokenize(handle.tokenizer, target_probes)
+    packed_control = _pre_tokenize(handle.tokenizer, control_probes)
+    packed_validation = _pre_tokenize(handle.tokenizer, validation_probes)
+    target_names = [probe["name"] for probe in target_probes]
+    control_names = [probe["name"] for probe in control_probes]
+    validation_names = [probe["name"] for probe in validation_probes]
+
+    if verbose:
+        print("measuring baseline logit gaps for target/control/validation probes", flush=True)
+    target_baseline = _measure_fast(handle.model, packed_target, target_names)
+    control_baseline = _measure_fast(handle.model, packed_control, control_names)
+    validation_baseline = _measure_fast(handle.model, packed_validation, validation_names)
+
+    sorted_targets = sorted(target_baseline.items(), key=lambda item: item[1])
+    screen_names = [name for name, _ in sorted_targets[: min(2, len(sorted_targets))]]
+    screen_indices = [target_names.index(name) for name in screen_names]
+    screen_packed = [packed_target[index] for index in screen_indices]
+
+    active_layers = _resolve_search_layers(config, search_layers, layer_profile)
+    if verbose:
+        print(f"building row-flip candidates from layers={active_layers}", flush=True)
+    candidates = _build_candidates(handle.model, active_layers, config["search"]["search_projs"], config["search"]["candidate_rows"])
+    candidate_weights = _candidate_weights(candidates, impact_weighted=impact_weighted)
+    rng = np.random.default_rng(abs(hash((task_name, "dynamic-greedy", fitness_mode))) & 0xFFFFFFFF)
+    fitness_fn = _fitness_min if fitness_mode == "min" else _fitness
+
+    accepted: list[PatchFlip] = []
+    tried: set[tuple[int, str, int]] = set()
+    trajectory: list[dict[str, Any]] = []
+    current_fitness = 0.0
+    screened_out = 0
+
+    if verbose:
+        row_label = "all" if candidate_rows <= 0 else str(candidate_rows)
+        print(
+            f"dynamic-greedy-search task={task_name} target_probes={len(target_probes)} "
+            f"control_probes={len(control_probes)} validation_probes={len(validation_probes)} "
+            f"max_iters={max_iters} fitness_mode={fitness_mode} screen_probes={screen_names} "
+            f"candidate_rows={row_label} max_flips={max_flips} candidates={len(candidates)} "
+            f"control_penalty={control_penalty}",
+            flush=True,
+        )
+
+    for step in range(max_iters):
+        if len(accepted) >= config["search"]["max_flips"]:
+            if verbose:
+                print(f"[greedy {step}/{max_iters}] reached max_flips={max_flips}", flush=True)
+            break
+
+        pool = _sample_pool(candidates, candidate_weights, rng, tried, 1)
+        if not pool:
+            if verbose:
+                print("[greedy] exhausted candidate pool", flush=True)
+            break
+
+        layer, proj, row, scale = pool[0]
+        flip_row(handle.model, layer, proj, row)
+        mx.eval(handle.model.parameters())
+
+        screen_gaps = _measure_fast(handle.model, screen_packed, screen_names)
+        screen_improved = any(screen_gaps[name] > target_baseline[name] for name in screen_names)
+        screen_gain = sum(screen_gaps[name] - target_baseline[name] for name in screen_names) / max(1, len(screen_names))
+
+        if not screen_improved:
+            flip_row(handle.model, layer, proj, row)
+            mx.eval(handle.model.parameters())
+            screened_out += 1
+            trajectory.append(
+                {
+                    "step": step,
+                    "layer": layer,
+                    "proj": proj,
+                    "row": row,
+                    "scale_mean": scale,
+                    "screen_gain": screen_gain,
+                    "accepted": False,
+                    "screened_out": True,
+                }
+            )
+            if verbose and (step + 1) % 25 == 0:
+                print(
+                    f"[greedy {step+1}/{max_iters}] screened_out={screened_out} "
+                    f"accepted={len(accepted)} fitness={current_fitness:+.6f}",
+                    flush=True,
+                )
+            continue
+
+        target_gaps = _measure_fast(handle.model, packed_target, target_names)
+        control_gaps = _measure_fast(handle.model, packed_control, control_names)
+        validation_gaps = _measure_fast(handle.model, packed_validation, validation_names)
+        fitness = fitness_fn(target_gaps, control_gaps, target_baseline, control_baseline, config["search"]["control_penalty"])
+        validation_gain = _mean_gain(validation_gaps, validation_baseline)
+        accepted_candidate = fitness > current_fitness
+
+        trajectory.append(
+            {
+                "step": step,
+                "layer": layer,
+                "proj": proj,
+                "row": row,
+                "scale_mean": scale,
+                "screen_gain": screen_gain,
+                "candidate_score": fitness,
+                "validation_gain": validation_gain,
+                "accepted": accepted_candidate,
+                "screened_out": False,
+            }
+        )
+
+        if accepted_candidate:
+            accepted.append(PatchFlip(layer=layer, proj=proj, row=row))
+            current_fitness = fitness
+            _save_patch_checkpoint(
+                output_path,
+                f"{task_name}_dynamic_greedy_patch",
+                f"Checkpoint for dynamic practical-eval Bankai greedy patch for {task_name}.",
+                model_ref,
+                accepted,
+                {
+                    "task": task_name,
+                    "search_algorithm": f"dynamic_real_greedy_screened_{fitness_mode}",
+                    "search_layers": active_layers,
+                    "layer_profile": layer_profile,
+                    "impact_weighted": impact_weighted,
+                    "final_fitness": current_fitness,
+                    "step": step,
+                },
+            )
+            if verbose:
+                print(
+                    f"[greedy {step+1}/{max_iters}] ACCEPT L{layer}.{proj}[{row}] "
+                    f"screen={screen_gain:+.6f} fitness={fitness:+.6f} "
+                    f"validation_gain={validation_gain:+.6f} flips={len(accepted)}/{max_flips}",
+                    flush=True,
+                )
+        else:
+            flip_row(handle.model, layer, proj, row)
+            mx.eval(handle.model.parameters())
+            if verbose and (step + 1) % 25 == 0:
+                print(
+                    f"[greedy {step+1}/{max_iters}] reject L{layer}.{proj}[{row}] "
+                    f"screen={screen_gain:+.6f} fitness={fitness:+.6f} "
+                    f"accepted={len(accepted)}",
+                    flush=True,
+                )
+
+    patch = BankaiPatch(
+        name=f"{task_name}_dynamic_greedy_patch",
+        description=f"Dynamic practical-eval Bankai greedy patch for {task_name}.",
+        base_model=model_ref,
+        flips=accepted,
+        metadata={
+            "benchmark": task_name,
+            "task": task_name,
+            "search_algorithm": f"dynamic_real_greedy_screened_{fitness_mode}",
+            "search_layers": active_layers,
+            "layer_profile": layer_profile,
+            "impact_weighted": impact_weighted,
+            "search_projs": config["search"]["search_projs"],
+            "control_penalty": config["search"]["control_penalty"],
+            "final_fitness": current_fitness,
+            "candidate_rows": candidate_rows,
+            "max_flips": max_flips,
+            "max_iters": max_iters,
+            "fitness_mode": fitness_mode,
+            "target_probe_count": len(target_probes),
+            "control_probe_count": len(control_probes),
+            "validation_probe_count": len(validation_probes),
+            "screen_probes": screen_names,
+            "screened_out": screened_out,
+            "model_summary": summary,
+        },
+    )
+    save_patch(output_path, patch)
+    save_run_manifest(
+        output_path.with_name("dynamic_search.json"),
+        {
+            "task": task_name,
+            "patch_path": str(output_path),
+            "best_score": current_fitness,
+            "trajectory": trajectory,
+            "mode": "dynamic_greedy",
+            "fitness_mode": fitness_mode,
+            "max_iters": max_iters,
+            "screened_out": screened_out,
         },
     )
     return RealSearchResult(patch=patch, best_score=current_fitness, trajectory=trajectory)

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bankai Eval Studio</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div>
+        <h1>Bankai Eval Studio</h1>
+        <p>Run a CSV eval, learn a patch from base-model mistakes, then compare the patched model.</p>
+      </div>
+      <nav>
+        <button class="nav-item active" data-view="run">Run Eval</button>
+        <button class="nav-item" data-view="results">Results</button>
+        <button class="nav-item" data-view="logs">Logs</button>
+      </nav>
+      <div class="runtime" id="runtime"></div>
+    </aside>
+
+    <main>
+      <section id="run" class="view active">
+        <header class="view-header">
+          <div>
+            <h2>Adaptive Eval</h2>
+            <p>Choose a CSV. Bankai will run the base model, build probes from failures, search a patch, and re-run the eval.</p>
+          </div>
+          <button id="runAdaptive">Run Adaptive Eval</button>
+        </header>
+
+        <section class="panel setup-panel">
+          <div class="step">
+            <span>1</span>
+            <div>
+              <h3>Choose CSV</h3>
+              <p>CSV must include <code>prompt</code> and either <code>expected</code> or <code>grader</code>.</p>
+              <div class="picker-row">
+                <input id="csvSource" type="text" readonly>
+                <button class="secondary" id="chooseCsv">Choose File</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <span>2</span>
+            <div>
+              <h3>Choose Model</h3>
+              <p>Use the Bankai-capable MLX Bonsai model you want to adapt.</p>
+              <input id="modelRef" type="text" value="prism-ml/Bonsai-8B-mlx-1bit">
+            </div>
+          </div>
+
+          <div class="step">
+            <span>3</span>
+            <div>
+              <h3>Save Results</h3>
+              <p>Each run stores base results, dynamic probes, patch, and patched results.</p>
+              <div class="picker-row">
+                <input id="outputDir" type="text" readonly>
+                <button class="secondary" id="chooseOutput">Choose Folder</button>
+              </div>
+            </div>
+          </div>
+
+          <details>
+            <summary>Advanced options</summary>
+            <div class="preset-row">
+              <label>Compute preset
+                <select id="computePreset">
+                  <option value="balanced">Balanced</option>
+                  <option value="large" selected>Large Apple Silicon</option>
+                  <option value="max">Maximum Search</option>
+                </select>
+              </label>
+              <label>Layer profile
+                <select id="layerProfile">
+                  <option value="stable" selected>High impact: 0-4, 34, 35</option>
+                  <option value="balanced">High + late</option>
+                  <option value="aggressive">Aggressive</option>
+                </select>
+              </label>
+              <label>Custom layers
+                <input id="layers" type="text" placeholder="0,1,2,3,4,34,35">
+              </label>
+              <label>Search mode
+                <select id="searchMode">
+                  <option value="shortlist">Shortlist</option>
+                  <option value="greedy" selected>Greedy screened</option>
+                </select>
+              </label>
+              <label>Fitness
+                <select id="fitnessMode">
+                  <option value="mean" selected>Mean gain</option>
+                  <option value="min">Worst probe</option>
+                </select>
+              </label>
+              <label class="inline option-check"><input id="impactWeighted" type="checkbox" checked> Impact-weighted sampling</label>
+            </div>
+            <div class="form-grid four">
+              <label>Max tokens<input id="maxTokens" type="number" min="16" value="320"></label>
+              <label>Search rounds<input id="rounds" type="number" min="1" value="10"></label>
+              <label>Greedy steps<input id="maxIters" type="number" min="1" value="600"></label>
+              <label>Candidate pool<input id="pool" type="number" min="2" value="24"></label>
+              <label>Top candidates<input id="topk" type="number" min="1" value="4"></label>
+              <label>Accept per round<input id="acceptPerRound" type="number" min="1" value="2"></label>
+              <label>Failure probes<input id="targetProbes" type="number" min="1" value="32"></label>
+              <label>Control probes<input id="controlProbes" type="number" min="1" value="16"></label>
+              <label>Candidate rows<input id="candidateRows" type="number" min="0" value="96"></label>
+              <label>Max patch flips<input id="maxFlips" type="number" min="1" value="32"></label>
+              <label>Control penalty<input id="controlPenalty" type="number" min="0" step="0.1" value="2.0"></label>
+              <label>Judge timeout<input id="judgeTimeout" type="number" min="10" value="180"></label>
+              <label>LLM judge command<input id="judgeCommand" type="text" placeholder="optional"></label>
+            </div>
+          </details>
+
+          <div class="status-card">
+            <span id="runStatus">Ready</span>
+            <small id="lastArtifact">No run yet</small>
+          </div>
+        </section>
+      </section>
+
+      <section id="results" class="view">
+        <header class="view-header">
+          <div>
+            <h2>Results</h2>
+            <p>Review stored summaries and example-level details from completed runs.</p>
+          </div>
+          <button class="secondary" id="refreshRuns">Refresh</button>
+        </header>
+        <div class="results-layout">
+          <section class="run-list" id="runList"></section>
+          <section class="panel result-detail">
+            <h3 id="resultTitle">Select a run</h3>
+            <div id="summaryCards" class="summary-cards"></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Model</th><th>Task</th><th>Rows</th><th>Accuracy</th><th>Errors</th><th>Mean Latency</th></tr></thead>
+                <tbody id="summaryTable"></tbody>
+              </table>
+            </div>
+            <h3>Examples</h3>
+            <div id="comparisonSummary" class="comparison-summary"></div>
+            <div id="comparisonExamples"></div>
+            <div id="examples"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="logs" class="view">
+        <header class="view-header">
+          <div>
+            <h2>Progress</h2>
+            <p>Live output from the Python sidecar.</p>
+          </div>
+          <button class="secondary" id="clearLogs">Clear</button>
+        </header>
+        <pre id="log"></pre>
+      </section>
+    </main>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

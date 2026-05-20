@@ -1,0 +1,13 @@
+{
+  "name": "bankai-eval-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron interface for configuring and reviewing Bankai eval pipeline runs.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^30.0.0"
+  }
+}

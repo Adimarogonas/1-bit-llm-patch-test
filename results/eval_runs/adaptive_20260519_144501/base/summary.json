@@ -1,0 +1,46 @@
+{
+  "dataset_path": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/data/practical_evals/sentiment_customer_reviews.csv",
+  "judge": {
+    "command": "",
+    "mode": "auto",
+    "timeout_s": 180
+  },
+  "max_tokens": 160,
+  "models": [
+    {
+      "command": "",
+      "enabled": true,
+      "kind": "mlx",
+      "model_ref": "prism-ml/Bonsai-8B-mlx-1bit",
+      "name": "base-model",
+      "patch_path": null,
+      "timeout_s": 180
+    }
+  ],
+  "summary": [
+    {
+      "accuracy": 1.0,
+      "benchmark": "all",
+      "correct": 30,
+      "elapsed_s": 9.760956291999719,
+      "errors": 0,
+      "examples": 30,
+      "kind": "mlx",
+      "mean_latency_ms": 325.3509181667141,
+      "model": "base-model",
+      "scored_examples": 30
+    },
+    {
+      "accuracy": 1.0,
+      "benchmark": "sentiment_customer_reviews",
+      "correct": 30,
+      "elapsed_s": 9.760956291999719,
+      "errors": 0,
+      "examples": 30,
+      "kind": "mlx",
+      "mean_latency_ms": 325.3509181667141,
+      "model": "base-model",
+      "scored_examples": 30
+    }
+  ]
+}

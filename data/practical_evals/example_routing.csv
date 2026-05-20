@@ -1,0 +1,4 @@
+id,prompt,expected,grader,assessment,system,route_set
+1,"Route this customer request to one queue: billing, technical_support, sales. Return only the queue name. Request: I was charged twice for my subscription renewal.",billing,,routing,"You are a routing classifier. Return only one queue name.",support
+2,"Route this customer request to one queue: billing, technical_support, sales. Return only the queue name. Request: Can your team help us choose the right enterprise plan?",sales,,routing,"You are a routing classifier. Return only one queue name.",support
+3,"Route this customer request to one queue: billing, technical_support, sales. Return only the queue name. Request: The API returns 500 errors when I upload a CSV.",technical_support,,routing,"You are a routing classifier. Return only one queue name.",support
