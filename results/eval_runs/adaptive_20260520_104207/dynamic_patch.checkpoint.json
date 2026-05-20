@@ -1,0 +1,112 @@
+{
+  "base_model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "description": "Checkpoint for dynamic practical-eval Bankai greedy patch for tool_call_selection.",
+  "flips": [
+    {
+      "layer": 35,
+      "proj": "up_proj",
+      "row": 99
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 9193
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 10385
+    },
+    {
+      "layer": 2,
+      "proj": "up_proj",
+      "row": 3903
+    },
+    {
+      "layer": 35,
+      "proj": "up_proj",
+      "row": 2263
+    },
+    {
+      "layer": 3,
+      "proj": "down_proj",
+      "row": 2660
+    },
+    {
+      "layer": 34,
+      "proj": "down_proj",
+      "row": 2406
+    },
+    {
+      "layer": 1,
+      "proj": "gate_proj",
+      "row": 4094
+    },
+    {
+      "layer": 0,
+      "proj": "up_proj",
+      "row": 8903
+    },
+    {
+      "layer": 35,
+      "proj": "down_proj",
+      "row": 1776
+    },
+    {
+      "layer": 0,
+      "proj": "up_proj",
+      "row": 9689
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 4312
+    },
+    {
+      "layer": 0,
+      "proj": "gate_proj",
+      "row": 1734
+    },
+    {
+      "layer": 34,
+      "proj": "up_proj",
+      "row": 8008
+    },
+    {
+      "layer": 0,
+      "proj": "gate_proj",
+      "row": 1868
+    },
+    {
+      "layer": 1,
+      "proj": "down_proj",
+      "row": 1144
+    }
+  ],
+  "format": "bankai_row_xor_v1",
+  "metadata": {
+    "checkpoint": true,
+    "final_fitness": 0.21649150545634913,
+    "impact_weighted": true,
+    "layer_profile": "stable",
+    "search_algorithm": "dynamic_real_greedy_screened_mean",
+    "search_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      34,
+      35
+    ],
+    "step": 57,
+    "task": "tool_call_selection"
+  },
+  "name": "tool_call_selection_dynamic_greedy_patch",
+  "stats": {
+    "bits_flipped": 65536,
+    "n_flips": 16,
+    "size_bytes": 192
+  },
+  "version": 1
+}

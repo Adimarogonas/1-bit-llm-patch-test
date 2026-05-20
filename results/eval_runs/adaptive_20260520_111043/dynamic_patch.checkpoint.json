@@ -1,0 +1,72 @@
+{
+  "base_model": "prism-ml/Bonsai-8B-mlx-1bit",
+  "description": "Checkpoint for dynamic practical-eval Bankai greedy patch for tool_call_selection.",
+  "flips": [
+    {
+      "layer": 3,
+      "proj": "gate_proj",
+      "row": 9596
+    },
+    {
+      "layer": 35,
+      "proj": "up_proj",
+      "row": 10148
+    },
+    {
+      "layer": 34,
+      "proj": "down_proj",
+      "row": 2782
+    },
+    {
+      "layer": 4,
+      "proj": "gate_proj",
+      "row": 5814
+    },
+    {
+      "layer": 4,
+      "proj": "up_proj",
+      "row": 6633
+    },
+    {
+      "layer": 0,
+      "proj": "down_proj",
+      "row": 2333
+    },
+    {
+      "layer": 35,
+      "proj": "up_proj",
+      "row": 4966
+    },
+    {
+      "layer": 35,
+      "proj": "gate_proj",
+      "row": 9466
+    }
+  ],
+  "format": "bankai_row_xor_v1",
+  "metadata": {
+    "checkpoint": true,
+    "final_fitness": 0.49493427579365096,
+    "impact_weighted": true,
+    "layer_profile": "stable",
+    "search_algorithm": "dynamic_real_greedy_screened_mean",
+    "search_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      34,
+      35
+    ],
+    "step": 29,
+    "task": "tool_call_selection"
+  },
+  "name": "tool_call_selection_dynamic_greedy_patch",
+  "stats": {
+    "bits_flipped": 32768,
+    "n_flips": 8,
+    "size_bytes": 96
+  },
+  "version": 1
+}

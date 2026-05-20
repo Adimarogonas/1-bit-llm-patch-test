@@ -237,14 +237,18 @@ function renderComparisonExamples(comparison) {
 }
 
 function renderComparisonPair(base, patched, statusClass) {
-  const expected = base.expected || base.reference || patched.expected || patched.reference || "";
+  const expected = expectedSummary(base, patched);
+  const baseFailure = failureSummary(base);
+  const patchedFailure = failureSummary(patched);
   return `
     <article class="example comparison-pair">
       <header>
         <strong>${escapeHtml(base.benchmark)} · ${escapeHtml(String(base.id))}</strong>
         <span class="${statusClass}">${escapeHtml(base.score?.passed ? "pass -> fail" : patched.score?.passed ? "fail -> pass" : "fail -> fail")}</span>
       </header>
-      <div class="expected">Expected: <strong>${escapeHtml(expected)}</strong></div>
+      ${expected}
+      ${baseFailure ? `<div class="failure-detail"><strong>Base mismatch</strong>${baseFailure}</div>` : ""}
+      ${patchedFailure ? `<div class="failure-detail"><strong>Patched mismatch</strong>${patchedFailure}</div>` : ""}
       <div class="prediction-grid">
         <div>
           <span>Base</span>
@@ -257,6 +261,58 @@ function renderComparisonPair(base, patched, statusClass) {
       </div>
     </article>
   `;
+}
+
+function expectedSummary(base, patched) {
+  const row = patched.expected_json ? patched : base;
+  const expectedJson = row.expected_json || base.expected_json || "";
+  const scalar = base.expected || base.reference || patched.expected || patched.reference || "";
+  const strictFields = strictFieldList(row);
+  if (expectedJson) {
+    let pretty = expectedJson;
+    try {
+      pretty = JSON.stringify(JSON.parse(expectedJson), null, 2);
+    } catch (_) {}
+    return `
+      <div class="expected">
+        <div><strong>Expected JSON</strong>${strictFields.length ? ` <span>strict: ${escapeHtml(strictFields.join(", "))}</span>` : ""}</div>
+        <pre>${escapeHtml(pretty)}</pre>
+      </div>
+    `;
+  }
+  return `<div class="expected">Expected: <strong>${escapeHtml(scalar)}</strong></div>`;
+}
+
+function strictFieldList(row) {
+  const value = row.strict_fields || row.metadata?.strict_fields || "";
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  return String(value).split(",").map((part) => part.trim()).filter(Boolean);
+}
+
+function failureSummary(row) {
+  if (row.score?.passed !== false) return "";
+  const mismatches = row.score?.mismatches || [];
+  if (!mismatches.length) {
+    const reason = row.score?.reason || row.score?.mode || "";
+    return reason ? `<p>${escapeHtml(reason)}</p>` : "";
+  }
+  return `<ul>${mismatches.map((mismatch) => `<li>${escapeHtml(formatMismatch(mismatch))}</li>`).join("")}</ul>`;
+}
+
+function formatMismatch(mismatch) {
+  if (mismatch.expected_keys || mismatch.actual_keys) {
+    return `${mismatch.path}: expected keys [${(mismatch.expected_keys || []).join(", ")}], actual keys [${(mismatch.actual_keys || []).join(", ")}]`;
+  }
+  if (mismatch.missing_keys) {
+    return `${mismatch.path}: missing keys [${mismatch.missing_keys.join(", ")}]`;
+  }
+  return `${mismatch.path}: expected ${formatValue(mismatch.expected)}, actual ${formatValue(mismatch.actual)}`;
+}
+
+function formatValue(value) {
+  if (value === null || value === undefined) return "missing";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
 }
 
 function metricCard(label, value, detail) {

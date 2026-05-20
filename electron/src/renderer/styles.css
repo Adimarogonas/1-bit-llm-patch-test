@@ -292,6 +292,38 @@ tr:last-child td { border-bottom: 0; }
   color: #7c2d12;
   font-size: 12px;
 }
+.expected span {
+  color: #9a3412;
+  font-weight: 700;
+}
+.expected pre {
+  max-height: 130px;
+  overflow: auto;
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+.failure-detail {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #7f1d1d;
+  font-size: 12px;
+}
+.failure-detail strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.failure-detail ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.failure-detail p {
+  margin: 0;
+}
 .prediction {
   max-height: 160px;
   overflow: auto;

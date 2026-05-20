@@ -1,0 +1,46 @@
+{
+  "dataset_path": "data/practical_evals/tool_call_selection.csv",
+  "judge": {
+    "command": "",
+    "mode": "auto",
+    "timeout_s": 180
+  },
+  "max_tokens": 400,
+  "models": [
+    {
+      "command": "",
+      "enabled": true,
+      "kind": "bankai_mlx",
+      "model_ref": "prism-ml/Bonsai-8B-mlx-1bit",
+      "name": "patched-model",
+      "patch_path": "results/eval_runs/adaptive_20260520_111043/dynamic_patch.json",
+      "timeout_s": 180
+    }
+  ],
+  "summary": [
+    {
+      "accuracy": 0.8,
+      "benchmark": "all",
+      "correct": 56,
+      "elapsed_s": 68.91087008299655,
+      "errors": 0,
+      "examples": 70,
+      "kind": "bankai_mlx",
+      "mean_latency_ms": 984.3768053570655,
+      "model": "patched-model",
+      "scored_examples": 70
+    },
+    {
+      "accuracy": 0.8,
+      "benchmark": "tool_call_selection",
+      "correct": 56,
+      "elapsed_s": 68.91087008299655,
+      "errors": 0,
+      "examples": 70,
+      "kind": "bankai_mlx",
+      "mean_latency_ms": 984.3768053570655,
+      "model": "patched-model",
+      "scored_examples": 70
+    }
+  ]
+}

@@ -1,0 +1,3016 @@
+{
+  "rows": [
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "delivered",
+      "expected_json": "{\"name\":\"search_orders\",\"arguments\":{\"customer_email\":\"jane.doe@example.com\",\"status\":\"delivered\"}}",
+      "grader": "",
+      "id": "1",
+      "latency_ms": 722.466291001183,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"search_orders\", \"arguments\": {\"customer_email\": \"jane.doe@example.com\", \"status\": \"delivered\"}}",
+      "prompt": "Find all delivered orders for jane.doe@example.com.",
+      "reference": "delivered",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "customer_email": "jane.doe@example.com",
+            "status": "delivered"
+          },
+          "name": "search_orders"
+        },
+        "assessment": "json_match",
+        "expected": "delivered",
+        "expected_payload": {
+          "arguments": {
+            "customer_email": "jane.doe@example.com",
+            "status": "delivered"
+          },
+          "name": "search_orders"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "search_orders",
+      "expected_json": "{\"name\":\"search_orders\",\"arguments\":{\"customer_email\":\"chris@acme.io\",\"status\":\"pending\"}}",
+      "grader": "",
+      "id": "2",
+      "latency_ms": 703.4534580016043,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"search_orders\", \"arguments\": {\"customer_email\": \"chris@acme.io\", \"status\": \"pending\"}}",
+      "prompt": "Show me everything pending for chris@acme.io.",
+      "reference": "search_orders",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "customer_email": "chris@acme.io",
+            "status": "pending"
+          },
+          "name": "search_orders"
+        },
+        "assessment": "json_match",
+        "expected": "search_orders",
+        "expected_payload": {
+          "arguments": {
+            "customer_email": "chris@acme.io",
+            "status": "pending"
+          },
+          "name": "search_orders"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "cancelled",
+      "expected_json": "{\"name\":\"search_orders\",\"arguments\":{\"customer_email\":\"billing-test@shop.com\",\"status\":\"cancelled\"}}",
+      "grader": "",
+      "id": "3",
+      "latency_ms": 718.7192089986638,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"search_orders\", \"arguments\": {\"customer_email\": \"billing-test@shop.com\", \"status\": \"cancelled\"}}",
+      "prompt": "What orders did billing-test@shop.com cancel?",
+      "reference": "cancelled",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "customer_email": "billing-test@shop.com",
+            "status": "cancelled"
+          },
+          "name": "search_orders"
+        },
+        "assessment": "json_match",
+        "expected": "cancelled",
+        "expected_payload": {
+          "arguments": {
+            "customer_email": "billing-test@shop.com",
+            "status": "cancelled"
+          },
+          "name": "search_orders"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "search_orders",
+      "expected_json": "{\"name\":\"search_orders\",\"arguments\":{\"customer_email\":\"marcus.lee@gmail.com\",\"status\":\"shipped\"}}",
+      "grader": "",
+      "id": "4",
+      "latency_ms": 705.4614169974229,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"search_orders\", \"arguments\": {\"customer_email\": \"marcus.lee@gmail.com\", \"status\": \"shipped\"}}",
+      "prompt": "List shipped items for marcus.lee@gmail.com.",
+      "reference": "search_orders",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "customer_email": "marcus.lee@gmail.com",
+            "status": "shipped"
+          },
+          "name": "search_orders"
+        },
+        "assessment": "json_match",
+        "expected": "search_orders",
+        "expected_payload": {
+          "arguments": {
+            "customer_email": "marcus.lee@gmail.com",
+            "status": "shipped"
+          },
+          "name": "search_orders"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "pending",
+      "expected_json": "{\"name\":\"search_orders\",\"arguments\":{\"customer_email\":\"hannah@startup.co\",\"status\":\"pending\"}}",
+      "grader": "",
+      "id": "5",
+      "latency_ms": 692.6532080033212,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"search_orders\", \"arguments\": {\"customer_email\": \"hannah@startup.co\", \"status\": \"pending\"}}",
+      "prompt": "Look up pending purchases under hannah@startup.co \u2014 she's asking when they'll ship.",
+      "reference": "pending",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "customer_email": "hannah@startup.co",
+            "status": "pending"
+          },
+          "name": "search_orders"
+        },
+        "assessment": "json_match",
+        "expected": "pending",
+        "expected_payload": {
+          "arguments": {
+            "customer_email": "hannah@startup.co",
+            "status": "pending"
+          },
+          "name": "search_orders"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "ORD-48291",
+      "expected_json": "{\"name\":\"refund_order\",\"arguments\":{\"order_id\":\"ORD-48291\",\"amount\":129.99,\"reason\":\"defective product\"}}",
+      "grader": "",
+      "id": "6",
+      "latency_ms": 808.4462080005324,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"refund_order\", \"arguments\": {\"order_id\": \"ORD-48291\", \"amount\": \"129.99\", \"reason\": \"product was defective\"}}",
+      "prompt": "Refund order ORD-48291 in full ($129.99). Customer says product was defective.",
+      "reference": "ORD-48291",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "amount": "129.99",
+            "order_id": "ORD-48291",
+            "reason": "product was defective"
+          },
+          "name": "refund_order"
+        },
+        "assessment": "json_match",
+        "expected": "ORD-48291",
+        "expected_payload": {
+          "arguments": {
+            "amount": 129.99,
+            "order_id": "ORD-48291",
+            "reason": "defective product"
+          },
+          "name": "refund_order"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "refund_order",
+      "expected_json": "{\"name\":\"refund_order\",\"arguments\":{\"order_id\":\"ORD-71103\",\"amount\":45.0,\"reason\":\"late shipment\"}}",
+      "grader": "",
+      "id": "7",
+      "latency_ms": 793.5903329998837,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"refund_order\", \"arguments\": {\"order_id\": \"ORD-71103\", \"amount\": 45, \"reason\": \"Shipment was a week late\"}}",
+      "prompt": "Issue a $45 refund for ORD-71103 because the shipment was a week late.",
+      "reference": "refund_order",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "amount": 45,
+            "order_id": "ORD-71103",
+            "reason": "Shipment was a week late"
+          },
+          "name": "refund_order"
+        },
+        "assessment": "json_match",
+        "expected": "refund_order",
+        "expected_payload": {
+          "arguments": {
+            "amount": 45.0,
+            "order_id": "ORD-71103",
+            "reason": "late shipment"
+          },
+          "name": "refund_order"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "ORD-99201",
+      "expected_json": "{\"name\":\"refund_order\",\"arguments\":{\"order_id\":\"ORD-99201\",\"amount\":null,\"reason\":\"never received\"}}",
+      "grader": "",
+      "id": "8",
+      "latency_ms": 839.497000000847,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"refund_order\", \"arguments\": {\"order_id\": \"ORD-99201\", \"amount\": \"100\", \"reason\": \"Customer did not receive the order\"}}",
+      "prompt": "Customer wants money back for order ORD-99201 \u2014 they never received it.",
+      "reference": "ORD-99201",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "amount": "100",
+            "order_id": "ORD-99201",
+            "reason": "Customer did not receive the order"
+          },
+          "name": "refund_order"
+        },
+        "assessment": "json_match",
+        "expected": "ORD-99201",
+        "expected_payload": {
+          "arguments": {
+            "amount": null,
+            "order_id": "ORD-99201",
+            "reason": "never received"
+          },
+          "name": "refund_order"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "refund_order",
+      "expected_json": "{\"name\":\"refund_order\",\"arguments\":{\"order_id\":\"ORD-55520\",\"amount\":200.0,\"reason\":\"duplicate charge\"}}",
+      "grader": "",
+      "id": "9",
+      "latency_ms": 777.2520409998833,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"refund_order\", \"arguments\": {\"order_id\": \"ORD-55520\", \"amount\": 200, \"reason\": \"duplicate charge\"}}",
+      "prompt": "Process a refund of 200 USD on ORD-55520. Reason: duplicate charge.",
+      "reference": "refund_order",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "amount": 200,
+            "order_id": "ORD-55520",
+            "reason": "duplicate charge"
+          },
+          "name": "refund_order"
+        },
+        "assessment": "json_match",
+        "expected": "refund_order",
+        "expected_payload": {
+          "arguments": {
+            "amount": 200.0,
+            "order_id": "ORD-55520",
+            "reason": "duplicate charge"
+          },
+          "name": "refund_order"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "ORD-30015",
+      "expected_json": "{\"name\":\"refund_order\",\"arguments\":{\"order_id\":\"ORD-30015\",\"amount\":87.5,\"reason\":\"damaged order\"}}",
+      "grader": "",
+      "id": "10",
+      "latency_ms": 790.0481659962679,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"refund_order\", \"arguments\": {\"order_id\": \"ORD-30015\", \"amount\": 87.50, \"reason\": \"Damaged\"}}",
+      "prompt": "Order ORD-30015 arrived damaged. Refund the customer fully \u2014 total was $87.50.",
+      "reference": "ORD-30015",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "amount": 87.5,
+            "order_id": "ORD-30015",
+            "reason": "Damaged"
+          },
+          "name": "refund_order"
+        },
+        "assessment": "json_match",
+        "expected": "ORD-30015",
+        "expected_payload": {
+          "arguments": {
+            "amount": 87.5,
+            "order_id": "ORD-30015",
+            "reason": "damaged order"
+          },
+          "name": "refund_order"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "ORD-44400",
+      "expected_json": "{\"name\":\"update_shipping_address\",\"arguments\":{\"order_id\":\"ORD-44400\",\"street\":\"1024 Pine St\",\"city\":\"Austin\",\"zip\":\"78701\"}}",
+      "grader": "",
+      "id": "11",
+      "latency_ms": 867.7596670022467,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"update_shipping_address\", \"arguments\": {\"order_id\": \"ORD-44400\", \"street\": \"1024 Pine St\", \"city\": \"Austin\", \"zip\": \"78701\"}}",
+      "prompt": "Change ship-to for ORD-44400 to 1024 Pine St, Austin, 78701.",
+      "reference": "ORD-44400",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "city": "Austin",
+            "order_id": "ORD-44400",
+            "street": "1024 Pine St",
+            "zip": "78701"
+          },
+          "name": "update_shipping_address"
+        },
+        "assessment": "json_match",
+        "expected": "ORD-44400",
+        "expected_payload": {
+          "arguments": {
+            "city": "Austin",
+            "order_id": "ORD-44400",
+            "street": "1024 Pine St",
+            "zip": "78701"
+          },
+          "name": "update_shipping_address"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "update_shipping_address",
+      "expected_json": "{\"name\":\"update_shipping_address\",\"arguments\":{\"order_id\":\"ORD-67812\",\"street\":\"88 Maple Ave\",\"city\":\"Brooklyn\",\"zip\":\"11201\"}}",
+      "grader": "",
+      "id": "12",
+      "latency_ms": 860.1789999956964,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"update_shipping_address\", \"arguments\": {\"order_id\": \"ORD-67812\", \"street\": \"88 Maple Ave\", \"city\": \"Brooklyn\", \"zip\": \"11201\"}}",
+      "prompt": "Customer moved \u2014 update order ORD-67812 to 88 Maple Ave, Brooklyn, 11201.",
+      "reference": "update_shipping_address",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "city": "Brooklyn",
+            "order_id": "ORD-67812",
+            "street": "88 Maple Ave",
+            "zip": "11201"
+          },
+          "name": "update_shipping_address"
+        },
+        "assessment": "json_match",
+        "expected": "update_shipping_address",
+        "expected_payload": {
+          "arguments": {
+            "city": "Brooklyn",
+            "order_id": "ORD-67812",
+            "street": "88 Maple Ave",
+            "zip": "11201"
+          },
+          "name": "update_shipping_address"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "ORD-23445",
+      "expected_json": "{\"name\":\"update_shipping_address\",\"arguments\":{\"order_id\":\"ORD-23445\",\"street\":\"410 Oak Boulevard\",\"city\":\"Denver\",\"zip\":\"80203\"}}",
+      "grader": "",
+      "id": "13",
+      "latency_ms": 891.9694580035866,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"update_shipping_address\", \"arguments\": {\"order_id\": \"ORD-23445\", \"street\": \"410 Oak Boulevard\", \"city\": \"Denver\", \"zip\": \"80203\"}}",
+      "prompt": "Wrong address on ORD-23445. New address: 410 Oak Boulevard, Denver, 80203.",
+      "reference": "ORD-23445",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "city": "Denver",
+            "order_id": "ORD-23445",
+            "street": "410 Oak Boulevard",
+            "zip": "80203"
+          },
+          "name": "update_shipping_address"
+        },
+        "assessment": "json_match",
+        "expected": "ORD-23445",
+        "expected_payload": {
+          "arguments": {
+            "city": "Denver",
+            "order_id": "ORD-23445",
+            "street": "410 Oak Boulevard",
+            "zip": "80203"
+          },
+          "name": "update_shipping_address"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "update_shipping_address",
+      "expected_json": "{\"name\":\"update_shipping_address\",\"arguments\":{\"order_id\":\"ORD-88812\",\"street\":\"22 Harbor Lane\",\"city\":\"Seattle\",\"zip\":\"98101\"}}",
+      "grader": "",
+      "id": "14",
+      "latency_ms": 853.4058340010233,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"update_shipping_address\", \"arguments\": {\"order_id\": \"ORD-88812\", \"street\": \"22 Harbor Lane\", \"city\": \"Seattle\", \"zip\": \"98101\"}}",
+      "prompt": "Please redirect ORD-88812 to 22 Harbor Lane, Seattle, 98101.",
+      "reference": "update_shipping_address",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "city": "Seattle",
+            "order_id": "ORD-88812",
+            "street": "22 Harbor Lane",
+            "zip": "98101"
+          },
+          "name": "update_shipping_address"
+        },
+        "assessment": "json_match",
+        "expected": "update_shipping_address",
+        "expected_payload": {
+          "arguments": {
+            "city": "Seattle",
+            "order_id": "ORD-88812",
+            "street": "22 Harbor Lane",
+            "zip": "98101"
+          },
+          "name": "update_shipping_address"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "60614",
+      "expected_json": "{\"name\":\"update_shipping_address\",\"arguments\":{\"order_id\":\"ORD-19073\",\"street\":\"1500 Lakeview Dr\",\"city\":\"Chicago\",\"zip\":\"60614\"}}",
+      "grader": "",
+      "id": "15",
+      "latency_ms": 952.5700840022182,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"update_shipping_address\", \"arguments\": {\"order_id\": \"ORD-19073\", \"street\": \"1500 Lakeview Dr\", \"city\": \"Chicago\", \"zip\": \"60614\"}}",
+      "prompt": "I typed my zip wrong on ORD-19073 \u2014 should be 60614 not 60616. Address: 1500 Lakeview Dr, Chicago, 60614.",
+      "reference": "60614",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "city": "Chicago",
+            "order_id": "ORD-19073",
+            "street": "1500 Lakeview Dr",
+            "zip": "60614"
+          },
+          "name": "update_shipping_address"
+        },
+        "assessment": "json_match",
+        "expected": "60614",
+        "expected_payload": {
+          "arguments": {
+            "city": "Chicago",
+            "order_id": "ORD-19073",
+            "street": "1500 Lakeview Dr",
+            "zip": "60614"
+          },
+          "name": "update_shipping_address"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "2026-06-01",
+      "expected_json": "{\"name\":\"cancel_subscription\",\"arguments\":{\"subscription_id\":\"SUB-7821\",\"effective_date\":\"2026-06-01\"}}",
+      "grader": "",
+      "id": "16",
+      "latency_ms": 768.5862920043292,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"cancel_subscription\", \"arguments\": {\"subscription_id\": \"SUB-7821\", \"effective_date\": \"2026-06-01\"}}",
+      "prompt": "Cancel subscription SUB-7821 effective 2026-06-01.",
+      "reference": "2026-06-01",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "effective_date": "2026-06-01",
+            "subscription_id": "SUB-7821"
+          },
+          "name": "cancel_subscription"
+        },
+        "assessment": "json_match",
+        "expected": "2026-06-01",
+        "expected_payload": {
+          "arguments": {
+            "effective_date": "2026-06-01",
+            "subscription_id": "SUB-7821"
+          },
+          "name": "cancel_subscription"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "2026-05-19",
+      "expected_json": "{\"name\":\"cancel_subscription\",\"arguments\":{\"subscription_id\":\"SUB-1144\",\"effective_date\":\"2026-05-19\"}}",
+      "grader": "",
+      "id": "17",
+      "latency_ms": 789.0304590036976,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"cancel_subscription\", \"arguments\": {\"subscription_id\": \"SUB-1144\", \"effective_date\": \"2026-05-19\"}}",
+      "prompt": "Customer wants to end SUB-1144 immediately \u2014 today is 2026-05-19.",
+      "reference": "2026-05-19",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "effective_date": "2026-05-19",
+            "subscription_id": "SUB-1144"
+          },
+          "name": "cancel_subscription"
+        },
+        "assessment": "json_match",
+        "expected": "2026-05-19",
+        "expected_payload": {
+          "arguments": {
+            "effective_date": "2026-05-19",
+            "subscription_id": "SUB-1144"
+          },
+          "name": "cancel_subscription"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "cancel_subscription",
+      "expected_json": "{\"name\":\"cancel_subscription\",\"arguments\":{\"subscription_id\":\"SUB-9930\",\"effective_date\":\"2026-07-15\"}}",
+      "grader": "",
+      "id": "18",
+      "latency_ms": 793.6448749969713,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"cancel_subscription\", \"arguments\": {\"subscription_id\": \"SUB-9930\", \"effective_date\": \"2026-07-15\"}}",
+      "prompt": "Stop renewing subscription SUB-9930 starting 2026-07-15.",
+      "reference": "cancel_subscription",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "effective_date": "2026-07-15",
+            "subscription_id": "SUB-9930"
+          },
+          "name": "cancel_subscription"
+        },
+        "assessment": "json_match",
+        "expected": "cancel_subscription",
+        "expected_payload": {
+          "arguments": {
+            "effective_date": "2026-07-15",
+            "subscription_id": "SUB-9930"
+          },
+          "name": "cancel_subscription"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "2026-05-31",
+      "expected_json": "{\"name\":\"cancel_subscription\",\"arguments\":{\"subscription_id\":\"SUB-4502\",\"effective_date\":\"2026-05-31\"}}",
+      "grader": "",
+      "id": "19",
+      "latency_ms": 768.5209170012968,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"cancel_subscription\", \"arguments\": {\"subscription_id\": \"SUB-4502\", \"effective_date\": \"2026-05-31\"}}",
+      "prompt": "Terminate SUB-4502 at end of billing cycle: 2026-05-31.",
+      "reference": "2026-05-31",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "effective_date": "2026-05-31",
+            "subscription_id": "SUB-4502"
+          },
+          "name": "cancel_subscription"
+        },
+        "assessment": "json_match",
+        "expected": "2026-05-31",
+        "expected_payload": {
+          "arguments": {
+            "effective_date": "2026-05-31",
+            "subscription_id": "SUB-4502"
+          },
+          "name": "cancel_subscription"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "SUB-6677",
+      "expected_json": "{\"name\":\"cancel_subscription\",\"arguments\":{\"subscription_id\":\"SUB-6677\",\"effective_date\":\"2026-08-01\"}}",
+      "grader": "",
+      "id": "20",
+      "latency_ms": 777.2668329998851,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"cancel_subscription\", \"arguments\": {\"subscription_id\": \"SUB-6677\", \"effective_date\": \"2026-08-01\"}}",
+      "prompt": "End SUB-6677 on 2026-08-01.",
+      "reference": "SUB-6677",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "effective_date": "2026-08-01",
+            "subscription_id": "SUB-6677"
+          },
+          "name": "cancel_subscription"
+        },
+        "assessment": "json_match",
+        "expected": "SUB-6677",
+        "expected_payload": {
+          "arguments": {
+            "effective_date": "2026-08-01",
+            "subscription_id": "SUB-6677"
+          },
+          "name": "cancel_subscription"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "sarah.kim@biz.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"sarah.kim@biz.com\",\"subject\":\"Order shipped\",\"body\":\"Please follow up regarding order shipped.\"}}",
+      "grader": "",
+      "id": "21",
+      "latency_ms": 889.8575830025948,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"sarah.kim@biz.com\", \"subject\": \"Your Order Shipped Today\", \"body\": \"Dear Sarah, your order has been shipped today. Thank you for your purchase!\"}}",
+      "prompt": "Email sarah.kim@biz.com to let her know her order shipped today.",
+      "reference": "sarah.kim@biz.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Dear Sarah, your order has been shipped today. Thank you for your purchase!",
+            "subject": "Your Order Shipped Today",
+            "to": "sarah.kim@biz.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "sarah.kim@biz.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding order shipped.",
+            "subject": "Order shipped",
+            "to": "sarah.kim@biz.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "send_email",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"t.nguyen@buyer.net\",\"subject\":\"Warranty registration confirmation\",\"body\":\"Please follow up regarding warranty registration confirmation.\"}}",
+      "grader": "",
+      "id": "22",
+      "latency_ms": 912.6414589991327,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"t.nguyen@buyer.net\", \"subject\": \"Warranty Registration Confirmation\", \"body\": \"Thank you for registering your warranty. Your confirmation has been sent to t.nguyen@buyer.net.\"}}",
+      "prompt": "Send a confirmation to t.nguyen@buyer.net about their warranty registration.",
+      "reference": "send_email",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Thank you for registering your warranty. Your confirmation has been sent to t.nguyen@buyer.net.",
+            "subject": "Warranty Registration Confirmation",
+            "to": "t.nguyen@buyer.net"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "send_email",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding warranty registration confirmation.",
+            "subject": "Warranty registration confirmation",
+            "to": "t.nguyen@buyer.net"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "ops-team@vendor.co",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"ops-team@vendor.co\",\"subject\":\"Delayed shipment\",\"body\":\"Please follow up regarding delayed shipment.\"}}",
+      "grader": "",
+      "id": "23",
+      "latency_ms": 1041.0822500052745,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"12345\", \"priority\": \"urgent\", \"team\": \"ops-team@vendor.co\", \"subject\": \"Delayed Shipment\", \"body\": \"We are following up on a delayed shipment. Please provide an update on the status and expected delivery date.\"}}",
+      "prompt": "Reach out to ops-team@vendor.co about the delayed shipment.",
+      "reference": "ops-team@vendor.co",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "We are following up on a delayed shipment. Please provide an update on the status and expected delivery date.",
+            "priority": "urgent",
+            "subject": "Delayed Shipment",
+            "team": "ops-team@vendor.co",
+            "ticket_id": "12345"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "ops-team@vendor.co",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding delayed shipment.",
+            "subject": "Delayed shipment",
+            "to": "ops-team@vendor.co"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [
+          {
+            "actual": "escalate_ticket",
+            "expected": "send_email",
+            "path": "name"
+          },
+          {
+            "actual": null,
+            "expected": "ops-team@vendor.co",
+            "path": "arguments.to"
+          },
+          {
+            "actual_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "to"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "send_email",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"support-escalation@partner.com\",\"subject\":\"SLA breach\",\"body\":\"Please follow up regarding sla breach.\"}}",
+      "grader": "",
+      "id": "24",
+      "latency_ms": 1202.271207999729,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"support-escalation@partner.com\", \"subject\": \"SLA Breach Notification\", \"body\": \"Dear Support Team,\\n\\nI am writing to inform you about a SLA breach that has occurred. The breach is related to the service agreement and has impacted our operations. Please be advised that this breach has been identified and requires immediate attention.\\n\\nKind regards,\\n[Your Name]\"}}",
+      "prompt": "Write to support-escalation@partner.com explaining the SLA breach.",
+      "reference": "send_email",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Dear Support Team,\n\nI am writing to inform you about a SLA breach that has occurred. The breach is related to the service agreement and has impacted our operations. Please be advised that this breach has been identified and requires immediate attention.\n\nKind regards,\n[Your Name]",
+            "subject": "SLA Breach Notification",
+            "to": "support-escalation@partner.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "send_email",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding sla breach.",
+            "subject": "SLA breach",
+            "to": "support-escalation@partner.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "lisa.park@retail.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"lisa.park@retail.io\",\"subject\":\"Feedback follow-up\",\"body\":\"Please follow up regarding feedback follow-up.\"}}",
+      "grader": "",
+      "id": "25",
+      "latency_ms": 1243.704415996035,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"lisa.park@retail.io\", \"subject\": \"Thank You for Your Feedback\", \"body\": \"Dear Lisa,\\n\\nThank you for taking the time to provide your feedback. We truly appreciate your insights and are committed to improving our services based on your experiences.\\n\\nIf you have any further questions or need assistance, please don't hesitate to reach out.\\n\\nBest regards,\\n[Your Name]\"}",
+      "prompt": "Compose an email to lisa.park@retail.io thanking her for the feedback.",
+      "reference": "lisa.park@retail.io",
+      "score": {
+        "actual_fields": {
+          "arguments.to": "lisa.park@retail.io",
+          "name": "send_email"
+        },
+        "actual_payload": null,
+        "assessment": "json_match",
+        "expected": "lisa.park@retail.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding feedback follow-up.",
+            "subject": "Feedback follow-up",
+            "to": "lisa.park@retail.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok_truncated_json_fields",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "urgent",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-3320\",\"priority\":\"urgent\",\"team\":\"security\"}}",
+      "grader": "",
+      "id": "26",
+      "latency_ms": 781.6378749994328,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-3320\", \"priority\": \"urgent\", \"team\": \"security\"}}",
+      "prompt": "Bump ticket TKT-3320 to urgent and route to the security team \u2014 possible data leak.",
+      "reference": "urgent",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "security",
+            "ticket_id": "TKT-3320"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "urgent",
+        "expected_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "security",
+            "ticket_id": "TKT-3320"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "high",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-7711\",\"priority\":\"high\",\"team\":\"network\"}}",
+      "grader": "",
+      "id": "27",
+      "latency_ms": 774.9657090025721,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-7711\", \"priority\": \"high\", \"team\": \"network team\"}}",
+      "prompt": "Escalate TKT-7711 to high priority for the network team.",
+      "reference": "high",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "high",
+            "team": "network team",
+            "ticket_id": "TKT-7711"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "high",
+        "expected_payload": {
+          "arguments": {
+            "priority": "high",
+            "team": "network",
+            "ticket_id": "TKT-7711"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual": "network team",
+            "expected": "network",
+            "path": "arguments.team"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "escalate_ticket",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-2100\",\"priority\":\"medium\",\"team\":\"billing\"}}",
+      "grader": "",
+      "id": "28",
+      "latency_ms": 762.3473749990808,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-2100\", \"priority\": \"medium\", \"team\": \"billing\"}}",
+      "prompt": "Move TKT-2100 to medium priority and assign to billing.",
+      "reference": "escalate_ticket",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "medium",
+            "team": "billing",
+            "ticket_id": "TKT-2100"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "escalate_ticket",
+        "expected_payload": {
+          "arguments": {
+            "priority": "medium",
+            "team": "billing",
+            "ticket_id": "TKT-2100"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "urgent",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-8845\",\"priority\":\"urgent\",\"team\":\"infrastructure\"}}",
+      "grader": "",
+      "id": "29",
+      "latency_ms": 766.7653329990571,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-8845\", \"priority\": \"urgent\", \"team\": \"infrastructure\"}}",
+      "prompt": "Critical outage \u2014 escalate TKT-8845 to urgent and send to infrastructure.",
+      "reference": "urgent",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "infrastructure",
+            "ticket_id": "TKT-8845"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "urgent",
+        "expected_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "infrastructure",
+            "ticket_id": "TKT-8845"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "low",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-6602\",\"priority\":\"low\",\"team\":\"legal\"}}",
+      "grader": "",
+      "id": "30",
+      "latency_ms": 1040.7433330037748,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-6602\", \"priority\": \"low\", \"team\": \"legal\", \"subject\": \"Customer complaint needs legal attention\", \"body\": \"Customer complaint TKT-6602 requires the legal team's attention at low priority for informational purposes.\"}}",
+      "prompt": "Customer complaint TKT-6602 needs to go to the legal team at low priority \u2014 informational.",
+      "reference": "low",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Customer complaint TKT-6602 requires the legal team's attention at low priority for informational purposes.",
+            "priority": "low",
+            "subject": "Customer complaint needs legal attention",
+            "team": "legal",
+            "ticket_id": "TKT-6602"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "low",
+        "expected_payload": {
+          "arguments": {
+            "priority": "low",
+            "team": "legal",
+            "ticket_id": "TKT-6602"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual_keys": [
+              "body",
+              "priority",
+              "subject",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "backend-team@platform.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"backend-team@platform.io\",\"subject\":\"Upcoming deploy\",\"body\":\"Please follow up regarding upcoming deploy.\"}}",
+      "grader": "",
+      "id": "31",
+      "latency_ms": 1058.6670840057195,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"backend-team@platform.io\", \"subject\": \"Upcoming Deploy on 2026-06-15\", \"body\": \"The upcoming deploy is scheduled for 2026-06-15. Please ensure all necessary preparations are in place.\"}}",
+      "prompt": "Email backend-team@platform.io about the upcoming deploy on 2026-06-15.",
+      "reference": "backend-team@platform.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "The upcoming deploy is scheduled for 2026-06-15. Please ensure all necessary preparations are in place.",
+            "subject": "Upcoming Deploy on 2026-06-15",
+            "to": "backend-team@platform.io"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "backend-team@platform.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding upcoming deploy.",
+            "subject": "Upcoming deploy",
+            "to": "backend-team@platform.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "send_email",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"legal-counsel@firm.com\",\"subject\":\"Contract received\",\"body\":\"Please follow up regarding contract received.\"}}",
+      "grader": "",
+      "id": "32",
+      "latency_ms": 822.2516669993638,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"legal-counsel@firm.com\", \"subject\": \"Confirmation of Contract Receipt\", \"body\": \"We have received the contract and confirm its receipt.\"}}",
+      "prompt": "Send a quick note to legal-counsel@firm.com confirming we received the contract.",
+      "reference": "send_email",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "We have received the contract and confirm its receipt.",
+            "subject": "Confirmation of Contract Receipt",
+            "to": "legal-counsel@firm.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "send_email",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding contract received.",
+            "subject": "Contract received",
+            "to": "legal-counsel@firm.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "dev-ops@cloudco.net",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"dev-ops@cloudco.net\",\"subject\":\"Pager rotation\",\"body\":\"Please follow up regarding pager rotation.\"}}",
+      "grader": "",
+      "id": "33",
+      "latency_ms": 1254.2562079979689,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"dev-ops@cloudco.net\", \"subject\": \"New Pager Rotation\", \"body\": \"Dear dev-ops@cloudco.net,\\n\\nI hope this message finds you well. I am reaching out to discuss the new pager rotation implementation. Could you please provide more details about the changes and any next steps we need to take?\\n\\nLooking forward to your response.\\n\\nBest regards,\\n[Your Name]\"}}",
+      "prompt": "Reach out to dev-ops@cloudco.net about the new pager rotation.",
+      "reference": "dev-ops@cloudco.net",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Dear dev-ops@cloudco.net,\n\nI hope this message finds you well. I am reaching out to discuss the new pager rotation implementation. Could you please provide more details about the changes and any next steps we need to take?\n\nLooking forward to your response.\n\nBest regards,\n[Your Name]",
+            "subject": "New Pager Rotation",
+            "to": "dev-ops@cloudco.net"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "dev-ops@cloudco.net",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding pager rotation.",
+            "subject": "Pager rotation",
+            "to": "dev-ops@cloudco.net"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "send_email",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"engineering-leads@startup.io\",\"subject\":\"Postmortem doc\",\"body\":\"Please follow up regarding postmortem doc.\"}}",
+      "grader": "",
+      "id": "34",
+      "latency_ms": 834.328082994034,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"engineering-leads@startup.io\", \"subject\": \"Postmortem Document\", \"body\": \"Please find attached the postmortem document for your reference.\"}}",
+      "prompt": "Drop a message to engineering-leads@startup.io regarding the postmortem doc.",
+      "reference": "send_email",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Please find attached the postmortem document for your reference.",
+            "subject": "Postmortem Document",
+            "to": "engineering-leads@startup.io"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "send_email",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding postmortem doc.",
+            "subject": "Postmortem doc",
+            "to": "engineering-leads@startup.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "billing-team@vendor.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"billing-team@vendor.com\",\"subject\":\"Invoice discrepancy\",\"body\":\"Please follow up regarding invoice discrepancy.\"}}",
+      "grader": "",
+      "id": "35",
+      "latency_ms": 928.0428749989369,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"billing-team@vendor.com\", \"subject\": \"Invoice Discrepancy on March's Bill\", \"body\": \"Please investigate the discrepancy on March's invoice and provide clarification at your earliest convenience.\"}}",
+      "prompt": "Contact billing-team@vendor.com about the invoice discrepancy on March's bill.",
+      "reference": "billing-team@vendor.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Please investigate the discrepancy on March's invoice and provide clarification at your earliest convenience.",
+            "subject": "Invoice Discrepancy on March's Bill",
+            "to": "billing-team@vendor.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "billing-team@vendor.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding invoice discrepancy.",
+            "subject": "Invoice discrepancy",
+            "to": "billing-team@vendor.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "send_email",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"customer-success@retailco.io\",\"subject\":\"Case 4421 resolved\",\"body\":\"Please follow up regarding case 4421 resolved.\"}}",
+      "grader": "",
+      "id": "36",
+      "latency_ms": 883.1389579936513,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"customer-success@retailco.io\", \"subject\": \"Case 4421 Resolved\", \"body\": \"The case with ID 4421 has been resolved.\"}}",
+      "prompt": "Notify customer-success@retailco.io that case 4421 is resolved.",
+      "reference": "send_email",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "The case with ID 4421 has been resolved.",
+            "subject": "Case 4421 Resolved",
+            "to": "customer-success@retailco.io"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "send_email",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding case 4421 resolved.",
+            "subject": "Case 4421 resolved",
+            "to": "customer-success@retailco.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "qa-team@labs.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"qa-team@labs.com\",\"subject\":\"Bug repro steps\",\"body\":\"Please follow up regarding bug repro steps.\"}}",
+      "grader": "",
+      "id": "37",
+      "latency_ms": 827.7441669997643,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"qa-team@labs.com\", \"subject\": \"Reconfirming Bug Repro Steps\", \"body\": \"Please confirm the bug repro steps as discussed.\"}}",
+      "prompt": "Reply to qa-team@labs.com confirming the bug repro steps.",
+      "reference": "qa-team@labs.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Please confirm the bug repro steps as discussed.",
+            "subject": "Reconfirming Bug Repro Steps",
+            "to": "qa-team@labs.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "qa-team@labs.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding bug repro steps.",
+            "subject": "Bug repro steps",
+            "to": "qa-team@labs.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "incidents@oncall.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"incidents@oncall.io\",\"subject\":\"Planned maintenance window\",\"body\":\"Please follow up regarding planned maintenance window.\"}}",
+      "grader": "",
+      "id": "38",
+      "latency_ms": 994.2030829988653,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"incidents@oncall.io\", \"subject\": \"Planned Maintenance Window\", \"body\": \"This is a heads-up about the planned maintenance window. Please be aware that maintenance will be conducted during this time. Thank you for your understanding.\"}}",
+      "prompt": "Send incidents@oncall.io a heads-up about the planned maintenance window.",
+      "reference": "incidents@oncall.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "This is a heads-up about the planned maintenance window. Please be aware that maintenance will be conducted during this time. Thank you for your understanding.",
+            "subject": "Planned Maintenance Window",
+            "to": "incidents@oncall.io"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "incidents@oncall.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding planned maintenance window.",
+            "subject": "Planned maintenance window",
+            "to": "incidents@oncall.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "high",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-9912\",\"priority\":\"high\",\"team\":\"platform\"}}",
+      "grader": "",
+      "id": "39",
+      "latency_ms": 793.4422910038847,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-9912\", \"priority\": \"high\", \"team\": \"platform team\"}}",
+      "prompt": "Escalate TKT-9912 to the platform team at high priority.",
+      "reference": "high",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "high",
+            "team": "platform team",
+            "ticket_id": "TKT-9912"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "high",
+        "expected_payload": {
+          "arguments": {
+            "priority": "high",
+            "team": "platform",
+            "ticket_id": "TKT-9912"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual": "platform team",
+            "expected": "platform",
+            "path": "arguments.team"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "urgent",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-1188\",\"priority\":\"urgent\",\"team\":\"legal\"}}",
+      "grader": "",
+      "id": "40",
+      "latency_ms": 996.0889170033624,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-1188\", \"priority\": \"urgent\", \"team\": \"legal team\", \"subject\": \"Possible regulatory issue\", \"body\": \"This is an urgent matter related to a potential regulatory issue. Please investigate immediately.\"}}",
+      "prompt": "Send TKT-1188 to the legal team and mark urgent \u2014 possible regulatory issue.",
+      "reference": "urgent",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "This is an urgent matter related to a potential regulatory issue. Please investigate immediately.",
+            "priority": "urgent",
+            "subject": "Possible regulatory issue",
+            "team": "legal team",
+            "ticket_id": "TKT-1188"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "urgent",
+        "expected_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "legal",
+            "ticket_id": "TKT-1188"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual": "legal team",
+            "expected": "legal",
+            "path": "arguments.team"
+          },
+          {
+            "actual_keys": [
+              "body",
+              "priority",
+              "subject",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "medium",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-4477\",\"priority\":\"medium\",\"team\":\"billing\"}}",
+      "grader": "",
+      "id": "41",
+      "latency_ms": 802.4474589983583,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-4477\", \"priority\": \"medium\", \"reason\": \"refund dispute\", \"team\": \"billing\"}}",
+      "prompt": "Route TKT-4477 to billing at medium priority \u2014 refund dispute.",
+      "reference": "medium",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "medium",
+            "reason": "refund dispute",
+            "team": "billing",
+            "ticket_id": "TKT-4477"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "medium",
+        "expected_payload": {
+          "arguments": {
+            "priority": "medium",
+            "team": "billing",
+            "ticket_id": "TKT-4477"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual_keys": [
+              "priority",
+              "reason",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "TKT-3050",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-3050\",\"priority\":\"low\",\"team\":\"ops\"}}",
+      "grader": "",
+      "id": "42",
+      "latency_ms": 1102.332166999986,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-3050\", \"priority\": \"low\", \"team\": \"ops\", \"subject\": \"Informational Ticket - TKT-3050\", \"body\": \"This is an informational ticket regarding TKT-3050. It is not an urgent matter and does not require immediate action.\"}}",
+      "prompt": "Push TKT-3050 to ops at low priority \u2014 informational only.",
+      "reference": "TKT-3050",
+      "score": {
+        "actual_fields": {
+          "arguments.priority": "low",
+          "arguments.team": "ops",
+          "arguments.ticket_id": "TKT-3050",
+          "name": null
+        },
+        "actual_payload": null,
+        "assessment": "json_match",
+        "expected": "TKT-3050",
+        "expected_payload": {
+          "arguments": {
+            "priority": "low",
+            "team": "ops",
+            "ticket_id": "TKT-3050"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual": null,
+            "expected": "escalate_ticket",
+            "path": "name"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "truncated json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "send_email",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"reagan@buyer.com\",\"subject\":\"Late delivery apology\",\"body\":\"Please follow up regarding late delivery apology.\"}}",
+      "grader": "",
+      "id": "43",
+      "latency_ms": 1846.9672919964069,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"reagan@buyer.com\", \"subject\": \"Apology for Late Delivery and Offer of 10% Discount\", \"body\": \"Dear Reagan,\\n\\nI sincerely apologize for the late delivery of your order. We understand how frustrating this must have been and take full responsibility for the inconvenience caused.\\n\\nWe are committed to providing you with the best possible experience and are working diligently to ensure that such issues do not occur in the future. As a gesture of goodwill, we would like to offer you a 10% discount on your next purchase using the code APOL10.\\n\\nThank you for your continued trust in our services. We value your business and hope to have the opportunity to make this right.\\n\\nBest regards,\\n[Your Name]\"}",
+      "prompt": "Write a detailed apology email to reagan@buyer.com about the late delivery and offer a 10% discount code APOL10.",
+      "reference": "send_email",
+      "score": {
+        "actual_fields": {
+          "arguments.to": "reagan@buyer.com",
+          "name": "send_email"
+        },
+        "actual_payload": null,
+        "assessment": "json_match",
+        "expected": "send_email",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding late delivery apology.",
+            "subject": "Late delivery apology",
+            "to": "reagan@buyer.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok_truncated_json_fields",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "enterprise@bigco.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"enterprise@bigco.com\",\"subject\":\"Contract renewal\",\"body\":\"Please follow up regarding contract renewal.\"}}",
+      "grader": "",
+      "id": "44",
+      "latency_ms": 2640.3435839965823,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"enterprise@bigco.com\", \"subject\": \"Follow-Up on Contract Renewal and SLA Changes\", \"body\": \"Dear Enterprise Team,\\n\\nI hope this message finds you well. I am writing to follow up on the contract renewal process for our enterprise account. As we approach the renewal date, we would like to bring to your attention the recent changes in pricing and the updated Service Level Agreement (SLA) that have been implemented.\\n\\nFirst, we would like to confirm the current pricing structure for our contract. We noticed that there have been some adjustments in the pricing, and we would appreciate your clarification on these changes to ensure that we are fully aware of the financial implications.\\n\\nSecond, we would like to discuss the new SLA that has been introduced. The SLA includes updated service level targets and response time expectations, and we would like to understand how these changes will affect our operations and whether they align with our current service requirements.\\n\\nWe are committed to maintaining a strong partnership with your team and would appreciate your guidance on these matters. Please let us know if there are any additional details or documentation required from our side to facilitate the renewal process.\\n\\nThank you for your attention to this matter. We look forward to your response.\\n\\nBest regards,\\n[Your Name]\"}",
+      "prompt": "Compose a thorough follow-up to enterprise@bigco.com about the contract renewal \u2014 mention the price changes and the new SLA.",
+      "reference": "enterprise@bigco.com",
+      "score": {
+        "actual_fields": {
+          "arguments.to": "enterprise@bigco.com",
+          "name": "send_email"
+        },
+        "actual_payload": null,
+        "assessment": "json_match",
+        "expected": "enterprise@bigco.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding contract renewal.",
+            "subject": "Contract renewal",
+            "to": "enterprise@bigco.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok_truncated_json_fields",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "compliance@audit.org",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"compliance@audit.org\",\"subject\":\"Data retention policy\",\"body\":\"Please follow up regarding data retention policy.\"}}",
+      "grader": "",
+      "id": "45",
+      "latency_ms": 2634.5587500036345,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"compliance@audit.org\", \"subject\": \"Updated Data Retention Policy\", \"body\": \"Dear Compliance Team,\\n\\nWe are writing to inform you of an important update to our data retention policy. Effective immediately, we have revised our approach to ensure that all customer data is stored and managed in accordance with the latest regulatory standards and industry best practices.\\n\\nThe changes include an extended retention period for customer information, with specific guidelines for when data can be securely deleted. We have also enhanced our data access controls to ensure that only authorized personnel can retrieve or modify customer records.\\n\\nThis update was made in response to recent changes in data protection laws and to better align our practices with those of our partners and clients. We understand the importance of transparency and compliance, and we are committed to maintaining the highest level of data security and privacy.\\n\\nPlease find attached a detailed document outlining the updated policy and its implementation steps. We encourage you to review the document thoroughly and reach out to our support team if you have any questions or require further clarification.\\n\\nThank you for your continued partnership and for your attention to these important updates. We value your trust and look forward to your feedback.\\n\\nBest regards,\\n[Your Name]\\n[Your Position]\\n[Your Company Name]\"}}",
+      "prompt": "Draft a long explanation email to compliance@audit.org about our updated data retention policy.",
+      "reference": "compliance@audit.org",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Dear Compliance Team,\n\nWe are writing to inform you of an important update to our data retention policy. Effective immediately, we have revised our approach to ensure that all customer data is stored and managed in accordance with the latest regulatory standards and industry best practices.\n\nThe changes include an extended retention period for customer information, with specific guidelines for when data can be securely deleted. We have also enhanced our data access controls to ensure that only authorized personnel can retrieve or modify customer records.\n\nThis update was made in response to recent changes in data protection laws and to better align our practices with those of our partners and clients. We understand the importance of transparency and compliance, and we are committed to maintaining the highest level of data security and privacy.\n\nPlease find attached a detailed document outlining the updated policy and its implementation steps. We encourage you to review the document thoroughly and reach out to our support team if you have any questions or require further clarification.\n\nThank you for your continued partnership and for your attention to these important updates. We value your trust and look forward to your feedback.\n\nBest regards,\n[Your Name]\n[Your Position]\n[Your Company Name]",
+            "subject": "Updated Data Retention Policy",
+            "to": "compliance@audit.org"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "compliance@audit.org",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding data retention policy.",
+            "subject": "Data retention policy",
+            "to": "compliance@audit.org"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "send_email",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"vip-customer@premier.com\",\"subject\":\"Follow-up from call\",\"body\":\"Please follow up regarding follow-up from call.\"}}",
+      "grader": "",
+      "id": "46",
+      "latency_ms": 3205.550750004477,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"vip-customer@premier.com\", \"subject\": \"Detailed Response to Yesterday's Call Concerns\", \"body\": \"Dear VIP Customer,\\n\\nThank you for reaching out and for your detailed concerns regarding yesterday's call. We sincerely apologize for any inconvenience or confusion caused and appreciate your patience and understanding.\\n\\nTo address your concerns:\\n1. We have reviewed the order status for your account and confirmed that the order is currently pending. We are working diligently to resolve this issue and will provide an update as soon as we have more information.\\n2. We have initiated a refund process for the order with order ID 123456. The refund amount of $500 has been processed, and the refund will be issued to your account within the next 5 business days.\\n3. We have updated your shipping address to the new address provided during the call. The new address is 123 Main Street, Anytown, USA, and we have ensured that the update is reflected in your account.\\n4. We have cancelled your subscription with subscription ID 789012, effective date of 2023-04-01. Your subscription will no longer be active after this date.\\n\\nWe understand the importance of timely resolution and are committed to providing you with the best possible service. If you have any further questions or concerns, please do not hesitate to contact us directly.\\n\\nThank you for your continued support and for bringing these concerns to our attention.\\n\\nBest regards,\\n[Your Name]\\n[Your Position]\\n[Your Company]\"}",
+      "prompt": "Send a detailed response to vip-customer@premier.com addressing all the concerns raised on yesterday's call.",
+      "reference": "send_email",
+      "score": {
+        "actual_fields": {
+          "arguments.to": "vip-customer@premier.com",
+          "name": "send_email"
+        },
+        "actual_payload": null,
+        "assessment": "json_match",
+        "expected": "send_email",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding follow-up from call.",
+            "subject": "Follow-up from call",
+            "to": "vip-customer@premier.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok_truncated_json_fields",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "refund_order",
+      "expected_json": "{\"name\":\"refund_order\",\"arguments\":{\"order_id\":\"ORD-77711\",\"amount\":50.0,\"reason\":\"customer requested refund\"}}",
+      "grader": "",
+      "id": "47",
+      "latency_ms": 759.4735419988865,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"refund_order\", \"arguments\": {\"order_id\": \"ORD-77711\", \"amount\": 50, \"reason\": \"Customer request\"}}",
+      "prompt": "I already emailed the customer \u2014 please refund ORD-77711 for $50.",
+      "reference": "refund_order",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "amount": 50,
+            "order_id": "ORD-77711",
+            "reason": "Customer request"
+          },
+          "name": "refund_order"
+        },
+        "assessment": "json_match",
+        "expected": "refund_order",
+        "expected_payload": {
+          "arguments": {
+            "amount": 50.0,
+            "order_id": "ORD-77711",
+            "reason": "customer requested refund"
+          },
+          "name": "refund_order"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "cancel_subscription",
+      "expected_json": "{\"name\":\"cancel_subscription\",\"arguments\":{\"subscription_id\":\"SUB-3344\",\"effective_date\":\"2026-09-01\"}}",
+      "grader": "",
+      "id": "48",
+      "latency_ms": 849.6512909987359,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"cancel_subscription\", \"arguments\": {\"subscription_id\": \"SUB-3344\", \"effective_date\": \"2026-09-01\"}}",
+      "prompt": "Cancel SUB-3344 effective 2026-09-01 \u2014 no need to email, I'll do that myself.",
+      "reference": "cancel_subscription",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "effective_date": "2026-09-01",
+            "subscription_id": "SUB-3344"
+          },
+          "name": "cancel_subscription"
+        },
+        "assessment": "json_match",
+        "expected": "cancel_subscription",
+        "expected_payload": {
+          "arguments": {
+            "effective_date": "2026-09-01",
+            "subscription_id": "SUB-3344"
+          },
+          "name": "cancel_subscription"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "security-team@corp.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"security-team@corp.com\",\"subject\":\"Security incident report\",\"body\":\"Please follow up regarding security incident report.\"}}",
+      "grader": "",
+      "id": "49",
+      "latency_ms": 806.4568330009934,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-5599\", \"priority\": \"urgent\", \"team\": \"security-team@corp.com\"}}",
+      "prompt": "Forward the security incident report to security-team@corp.com \u2014 this concerns TKT-5599 and it's urgent.",
+      "reference": "security-team@corp.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "security-team@corp.com",
+            "ticket_id": "TKT-5599"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "security-team@corp.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding security incident report.",
+            "subject": "Security incident report",
+            "to": "security-team@corp.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [
+          {
+            "actual": "escalate_ticket",
+            "expected": "send_email",
+            "path": "name"
+          },
+          {
+            "actual": null,
+            "expected": "security-team@corp.com",
+            "path": "arguments.to"
+          },
+          {
+            "actual_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "to"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "oncall-leads@infra.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"oncall-leads@infra.com\",\"subject\":\"Production outage\",\"body\":\"Please follow up regarding production outage.\"}}",
+      "grader": "",
+      "id": "50",
+      "latency_ms": 877.40404199576,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"oncall-leads@infra.com\", \"subject\": \"Outage in Production\", \"body\": \"There is an outage in production. Please address this issue.\"}}",
+      "prompt": "Loop in oncall-leads@infra.com about the outage in production.",
+      "reference": "oncall-leads@infra.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "There is an outage in production. Please address this issue.",
+            "subject": "Outage in Production",
+            "to": "oncall-leads@infra.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "oncall-leads@infra.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding production outage.",
+            "subject": "Production outage",
+            "to": "oncall-leads@infra.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "security-team@corp.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"security-team@corp.io\",\"subject\":\"Suspicious login attempts\",\"body\":\"Please follow up regarding suspicious login attempts.\"}}",
+      "grader": "",
+      "id": "51",
+      "latency_ms": 768.490540998755,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"suspicious_login_attempts\", \"priority\": \"urgent\", \"team\": \"security-team@corp.io\"}}",
+      "prompt": "Contact security-team@corp.io about the suspicious login attempts.",
+      "reference": "security-team@corp.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "security-team@corp.io",
+            "ticket_id": "suspicious_login_attempts"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "security-team@corp.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding suspicious login attempts.",
+            "subject": "Suspicious login attempts",
+            "to": "security-team@corp.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [
+          {
+            "actual": "escalate_ticket",
+            "expected": "send_email",
+            "path": "name"
+          },
+          {
+            "actual": null,
+            "expected": "security-team@corp.io",
+            "path": "arguments.to"
+          },
+          {
+            "actual_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "to"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "support-eng@vendor.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"support-eng@vendor.io\",\"subject\":\"API timeouts\",\"body\":\"Please follow up regarding api timeouts.\"}}",
+      "grader": "",
+      "id": "52",
+      "latency_ms": 912.2234999958891,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"support-eng@vendor.io\", \"subject\": \"API Timeouts Issue\", \"body\": \"I am reaching out about the API timeouts that I have been experiencing. Could you please investigate and resolve this issue?\"}}",
+      "prompt": "Reach out to support-eng@vendor.io about the API timeouts.",
+      "reference": "support-eng@vendor.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "I am reaching out about the API timeouts that I have been experiencing. Could you please investigate and resolve this issue?",
+            "subject": "API Timeouts Issue",
+            "to": "support-eng@vendor.io"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "support-eng@vendor.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding api timeouts.",
+            "subject": "API timeouts",
+            "to": "support-eng@vendor.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "finance-team@firm.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"finance-team@firm.com\",\"subject\":\"Missing reimbursement\",\"body\":\"Please follow up regarding missing reimbursement.\"}}",
+      "grader": "",
+      "id": "53",
+      "latency_ms": 1230.768082998111,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"finance-team@firm.com\", \"subject\": \"Missing Reimbursement Inquiry\", \"body\": \"Dear Finance Team, I hope this message finds you well. I am reaching out regarding a missing reimbursement that I believe should be addressed. Could you please investigate and provide an update on the status of this matter? I would appreciate your assistance in resolving this as soon as possible. Thank you for your time and support.\"}}",
+      "prompt": "Get in touch with finance-team@firm.com about the missing reimbursement.",
+      "reference": "finance-team@firm.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Dear Finance Team, I hope this message finds you well. I am reaching out regarding a missing reimbursement that I believe should be addressed. Could you please investigate and provide an update on the status of this matter? I would appreciate your assistance in resolving this as soon as possible. Thank you for your time and support.",
+            "subject": "Missing Reimbursement Inquiry",
+            "to": "finance-team@firm.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "finance-team@firm.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding missing reimbursement.",
+            "subject": "Missing reimbursement",
+            "to": "finance-team@firm.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "infra-team@platform.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"infra-team@platform.io\",\"subject\":\"Dropped requests\",\"body\":\"Please follow up regarding dropped requests.\"}}",
+      "grader": "",
+      "id": "54",
+      "latency_ms": 804.2279169967514,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"dropped_requests_yesterday\", \"priority\": \"urgent\", \"team\": \"infra-team@platform.io\"}}",
+      "prompt": "Ping infra-team@platform.io about the dropped requests yesterday.",
+      "reference": "infra-team@platform.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "infra-team@platform.io",
+            "ticket_id": "dropped_requests_yesterday"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "infra-team@platform.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding dropped requests.",
+            "subject": "Dropped requests",
+            "to": "infra-team@platform.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [
+          {
+            "actual": "escalate_ticket",
+            "expected": "send_email",
+            "path": "name"
+          },
+          {
+            "actual": null,
+            "expected": "infra-team@platform.io",
+            "path": "arguments.to"
+          },
+          {
+            "actual_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "to"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "data-team@analytics.co",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"data-team@analytics.co\",\"subject\":\"Pipeline failures\",\"body\":\"Please follow up regarding pipeline failures.\"}}",
+      "grader": "",
+      "id": "55",
+      "latency_ms": 981.2827079949784,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"data-team@analytics.co\", \"subject\": \"Pipeline Failures Last Night\", \"body\": \"Please find the details about the pipeline failures that occurred last night. Kindly review the attached report and let us know if you need any further assistance.\"}}",
+      "prompt": "Email data-team@analytics.co about the pipeline failures last night.",
+      "reference": "data-team@analytics.co",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Please find the details about the pipeline failures that occurred last night. Kindly review the attached report and let us know if you need any further assistance.",
+            "subject": "Pipeline Failures Last Night",
+            "to": "data-team@analytics.co"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "data-team@analytics.co",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding pipeline failures.",
+            "subject": "Pipeline failures",
+            "to": "data-team@analytics.co"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "product-team@startup.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"product-team@startup.io\",\"subject\":\"Checkout regression\",\"body\":\"Please follow up regarding checkout regression.\"}}",
+      "grader": "",
+      "id": "56",
+      "latency_ms": 759.7694169962779,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"regression_in_checkout\", \"priority\": \"urgent\", \"team\": \"product-team@startup.io\"}}",
+      "prompt": "Let product-team@startup.io know about the regression in checkout.",
+      "reference": "product-team@startup.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "product-team@startup.io",
+            "ticket_id": "regression_in_checkout"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "product-team@startup.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding checkout regression.",
+            "subject": "Checkout regression",
+            "to": "product-team@startup.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [
+          {
+            "actual": "escalate_ticket",
+            "expected": "send_email",
+            "path": "name"
+          },
+          {
+            "actual": null,
+            "expected": "product-team@startup.io",
+            "path": "arguments.to"
+          },
+          {
+            "actual_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "to"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "devops-team@cloud.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"devops-team@cloud.com\",\"subject\":\"Certificate expiration\",\"body\":\"Please follow up regarding certificate expiration.\"}}",
+      "grader": "",
+      "id": "57",
+      "latency_ms": 877.54537499859,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"devops-team@cloud.com\", \"subject\": \"Certificate Expiration Reminder\", \"body\": \"The certificate is set to expire next week. Please take necessary actions to renew it.\"}}",
+      "prompt": "Notify devops-team@cloud.com about the certificate expiring next week.",
+      "reference": "devops-team@cloud.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "The certificate is set to expire next week. Please take necessary actions to renew it.",
+            "subject": "Certificate Expiration Reminder",
+            "to": "devops-team@cloud.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "devops-team@cloud.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding certificate expiration.",
+            "subject": "Certificate expiration",
+            "to": "devops-team@cloud.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "ops-staff@warehouse.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"ops-staff@warehouse.com\",\"subject\":\"Inventory mismatch\",\"body\":\"Please follow up regarding inventory mismatch.\"}}",
+      "grader": "",
+      "id": "58",
+      "latency_ms": 857.1850830048788,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"ops-staff@warehouse.com\", \"subject\": \"Inventory Mismatch\", \"body\": \"Please investigate the inventory mismatch and resolve it at your earliest convenience.\"}}",
+      "prompt": "Message ops-staff@warehouse.com about the inventory mismatch.",
+      "reference": "ops-staff@warehouse.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Please investigate the inventory mismatch and resolve it at your earliest convenience.",
+            "subject": "Inventory Mismatch",
+            "to": "ops-staff@warehouse.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "ops-staff@warehouse.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding inventory mismatch.",
+            "subject": "Inventory mismatch",
+            "to": "ops-staff@warehouse.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "qa-leads@labs.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"qa-leads@labs.io\",\"subject\":\"Failing nightly run\",\"body\":\"Please follow up regarding failing nightly run.\"}}",
+      "grader": "",
+      "id": "59",
+      "latency_ms": 889.4495829954394,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"qa-leads@labs.io\", \"subject\": \"Failing Nightly Run\", \"body\": \"The nightly run has been failing. Please investigate and resolve the issue.\"}}",
+      "prompt": "Write to qa-leads@labs.io about the failing nightly run.",
+      "reference": "qa-leads@labs.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "The nightly run has been failing. Please investigate and resolve the issue.",
+            "subject": "Failing Nightly Run",
+            "to": "qa-leads@labs.io"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "qa-leads@labs.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding failing nightly run.",
+            "subject": "Failing nightly run",
+            "to": "qa-leads@labs.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "hr-ops@company.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"hr-ops@company.com\",\"subject\":\"Time-off request form\",\"body\":\"Please follow up regarding time-off request form.\"}}",
+      "grader": "",
+      "id": "60",
+      "latency_ms": 908.9406249986496,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"hr-ops@company.com\", \"subject\": \"Broken Time-Off Request Form\", \"body\": \"The time-off request form is broken. Please fix it so that users can submit their requests properly.\"}}",
+      "prompt": "Send hr-ops@company.com a note about the broken time-off request form.",
+      "reference": "hr-ops@company.com",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "The time-off request form is broken. Please fix it so that users can submit their requests properly.",
+            "subject": "Broken Time-Off Request Form",
+            "to": "hr-ops@company.com"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "hr-ops@company.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding time-off request form.",
+            "subject": "Time-off request form",
+            "to": "hr-ops@company.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "security-incidents@corp.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"security-incidents@corp.io\",\"subject\":\"Possible data breach\",\"body\":\"Please follow up regarding possible data breach.\"}}",
+      "grader": "",
+      "id": "61",
+      "latency_ms": 965.0226669982658,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"security-incidents@corp.io\", \"subject\": \"Possible Data Breach Affecting Tier-1 Accounts\", \"body\": \"This is an email about a possible data breach affecting Tier-1 accounts. Please investigate and take necessary actions.\"}}",
+      "prompt": "Email security-incidents@corp.io about TKT-9999 \u2014 possible data breach affecting Tier-1 accounts.",
+      "reference": "security-incidents@corp.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "This is an email about a possible data breach affecting Tier-1 accounts. Please investigate and take necessary actions.",
+            "subject": "Possible Data Breach Affecting Tier-1 Accounts",
+            "to": "security-incidents@corp.io"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "security-incidents@corp.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding possible data breach.",
+            "subject": "Possible data breach",
+            "to": "security-incidents@corp.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "engineering-leads@startup.io",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"engineering-leads@startup.io\",\"subject\":\"Auth bug blocking customers\",\"body\":\"Please follow up regarding auth bug blocking customers.\"}}",
+      "grader": "",
+      "id": "62",
+      "latency_ms": 1174.7237090021372,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"engineering-leads@startup.io\", \"subject\": \"Issue with TKT-4422 Auth Bug\", \"body\": \"Dear Engineering Team, I am reaching out to report an issue with the TKT-4422 auth bug that is currently blocking customers. Please investigate and resolve this matter at your earliest convenience. Thank you for your attention.\"}}",
+      "prompt": "Reach out to engineering-leads@startup.io about TKT-4422 \u2014 the auth bug is blocking customers.",
+      "reference": "engineering-leads@startup.io",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Dear Engineering Team, I am reaching out to report an issue with the TKT-4422 auth bug that is currently blocking customers. Please investigate and resolve this matter at your earliest convenience. Thank you for your attention.",
+            "subject": "Issue with TKT-4422 Auth Bug",
+            "to": "engineering-leads@startup.io"
+          },
+          "name": "send_email"
+        },
+        "assessment": "json_match",
+        "expected": "engineering-leads@startup.io",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding auth bug blocking customers.",
+            "subject": "Auth bug blocking customers",
+            "to": "engineering-leads@startup.io"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "urgent",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-2299\",\"priority\":\"urgent\",\"team\":\"security ops\"}}",
+      "grader": "",
+      "id": "63",
+      "latency_ms": 859.9775410039001,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-2299\", \"priority\": \"urgent\", \"team\": \"security ops\", \"reason\": \"possible intrusion in progress\"}}",
+      "prompt": "Escalate TKT-2299 to the security ops at urgent priority \u2014 possible intrusion in progress.",
+      "reference": "urgent",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "reason": "possible intrusion in progress",
+            "team": "security ops",
+            "ticket_id": "TKT-2299"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "urgent",
+        "expected_payload": {
+          "arguments": {
+            "priority": "urgent",
+            "team": "security ops",
+            "ticket_id": "TKT-2299"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual_keys": [
+              "priority",
+              "reason",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "medium",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-5520\",\"priority\":\"medium\",\"team\":\"product engineering\"}}",
+      "grader": "",
+      "id": "64",
+      "latency_ms": 763.7315830070293,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-5520\", \"priority\": \"medium\", \"team\": \"product engineering\"}}",
+      "prompt": "Push TKT-5520 to product engineering at medium priority.",
+      "reference": "medium",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "priority": "medium",
+            "team": "product engineering",
+            "ticket_id": "TKT-5520"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "medium",
+        "expected_payload": {
+          "arguments": {
+            "priority": "medium",
+            "team": "product engineering",
+            "ticket_id": "TKT-5520"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "TKT-7800",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-7800\",\"priority\":\"low\",\"team\":\"data\"}}",
+      "grader": "",
+      "id": "65",
+      "latency_ms": 905.4935839958489,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-7800\", \"priority\": \"low\", \"team\": \"data team\", \"subject\": \"Heads up\", \"body\": \"Just a heads up.\"}}",
+      "prompt": "Send TKT-7800 to the data team at low priority \u2014 just a heads up.",
+      "reference": "TKT-7800",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "Just a heads up.",
+            "priority": "low",
+            "subject": "Heads up",
+            "team": "data team",
+            "ticket_id": "TKT-7800"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "TKT-7800",
+        "expected_payload": {
+          "arguments": {
+            "priority": "low",
+            "team": "data",
+            "ticket_id": "TKT-7800"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual": "data team",
+            "expected": "data",
+            "path": "arguments.team"
+          },
+          {
+            "actual_keys": [
+              "body",
+              "priority",
+              "subject",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "high",
+      "expected_json": "{\"name\":\"escalate_ticket\",\"arguments\":{\"ticket_id\":\"TKT-1107\",\"priority\":\"high\",\"team\":\"mobile platform\"}}",
+      "grader": "",
+      "id": "66",
+      "latency_ms": 1169.1208339980221,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"escalate_ticket\", \"arguments\": {\"ticket_id\": \"TKT-1107\", \"priority\": \"high\", \"team\": \"mobile platform\", \"subject\": \"Escalation for TKT-1107 to mobile platform\", \"body\": \"This ticket (TKT-1107) needs to be escalated to the mobile platform team at high priority. It affects iOS users.\"}}",
+      "prompt": "Escalate TKT-1107 to mobile platform at high priority \u2014 affecting iOS users.",
+      "reference": "high",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "body": "This ticket (TKT-1107) needs to be escalated to the mobile platform team at high priority. It affects iOS users.",
+            "priority": "high",
+            "subject": "Escalation for TKT-1107 to mobile platform",
+            "team": "mobile platform",
+            "ticket_id": "TKT-1107"
+          },
+          "name": "escalate_ticket"
+        },
+        "assessment": "json_match",
+        "expected": "high",
+        "expected_payload": {
+          "arguments": {
+            "priority": "high",
+            "team": "mobile platform",
+            "ticket_id": "TKT-1107"
+          },
+          "name": "escalate_ticket"
+        },
+        "mismatches": [
+          {
+            "actual_keys": [
+              "body",
+              "priority",
+              "subject",
+              "team",
+              "ticket_id"
+            ],
+            "expected_keys": [
+              "priority",
+              "team",
+              "ticket_id"
+            ],
+            "path": "arguments"
+          }
+        ],
+        "mode": "json_match",
+        "passed": false,
+        "reason": "json mismatch",
+        "score": 0.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "lila@vendor.com",
+      "expected_json": "{\"name\":\"send_email\",\"arguments\":{\"to\":\"lila@vendor.com\",\"subject\":\"New pricing tier rollout\",\"body\":\"Please follow up regarding new pricing tier rollout.\"}}",
+      "grader": "",
+      "id": "67",
+      "latency_ms": 1631.465999998909,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"send_email\", \"arguments\": {\"to\": \"lila@vendor.com\", \"subject\": \"New Pricing Tier Rollout\", \"body\": \"Dear Lila,\\n\\nWe are pleased to announce the rollout of our new pricing tiers. These tiers are designed to offer greater flexibility and value for our customers.\\n\\nPlease find the details below:\\n\\n- Tier 1: Basic features at a competitive price\\n- Tier 2: Enhanced features with a slight increase in cost\\n- Tier 3: Premium features with the highest level of support\\n\\nWe encourage you to review the changes and let us know if you have any questions.\\n\\nBest regards,\\n[Your Name]\"}",
+      "prompt": "Email lila@vendor.com about the new pricing tier rollout.",
+      "reference": "lila@vendor.com",
+      "score": {
+        "actual_fields": {
+          "arguments.to": "lila@vendor.com",
+          "name": "send_email"
+        },
+        "actual_payload": null,
+        "assessment": "json_match",
+        "expected": "lila@vendor.com",
+        "expected_payload": {
+          "arguments": {
+            "body": "Please follow up regarding new pricing tier rollout.",
+            "subject": "New pricing tier rollout",
+            "to": "lila@vendor.com"
+          },
+          "name": "send_email"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok_truncated_json_fields",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "ORD-22210",
+      "expected_json": "{\"name\":\"refund_order\",\"arguments\":{\"order_id\":\"ORD-22210\",\"amount\":25.0,\"reason\":\"wrong color shipped\"}}",
+      "grader": "",
+      "id": "68",
+      "latency_ms": 771.114833005413,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"refund_order\", \"arguments\": {\"order_id\": \"ORD-22210\", \"amount\": 25, \"reason\": \"wrong color shipped\"}}",
+      "prompt": "Refund ORD-22210 for $25 due to wrong color shipped.",
+      "reference": "ORD-22210",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "amount": 25,
+            "order_id": "ORD-22210",
+            "reason": "wrong color shipped"
+          },
+          "name": "refund_order"
+        },
+        "assessment": "json_match",
+        "expected": "ORD-22210",
+        "expected_payload": {
+          "arguments": {
+            "amount": 25.0,
+            "order_id": "ORD-22210",
+            "reason": "wrong color shipped"
+          },
+          "name": "refund_order"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "pending",
+      "expected_json": "{\"name\":\"search_orders\",\"arguments\":{\"customer_email\":\"marcus@buyer.co\",\"status\":\"pending\"}}",
+      "grader": "",
+      "id": "69",
+      "latency_ms": 687.5744159988244,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"search_orders\", \"arguments\": {\"customer_email\": \"marcus@buyer.co\", \"status\": \"pending\"}}",
+      "prompt": "Find all pending orders for marcus@buyer.co.",
+      "reference": "pending",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "customer_email": "marcus@buyer.co",
+            "status": "pending"
+          },
+          "name": "search_orders"
+        },
+        "assessment": "json_match",
+        "expected": "pending",
+        "expected_payload": {
+          "arguments": {
+            "customer_email": "marcus@buyer.co",
+            "status": "pending"
+          },
+          "name": "search_orders"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    },
+    {
+      "benchmark": "tool_call_selection",
+      "error": null,
+      "expected": "2026-12-01",
+      "expected_json": "{\"name\":\"cancel_subscription\",\"arguments\":{\"subscription_id\":\"SUB-8898\",\"effective_date\":\"2026-12-01\"}}",
+      "grader": "",
+      "id": "70",
+      "latency_ms": 780.3820420012926,
+      "model": "patched-model",
+      "model_kind": "bankai_mlx",
+      "prediction": "{\"name\": \"cancel_subscription\", \"arguments\": {\"subscription_id\": \"SUB-8898\", \"effective_date\": \"2026-12-01\"}}",
+      "prompt": "Cancel SUB-8898 effective 2026-12-01.",
+      "reference": "2026-12-01",
+      "score": {
+        "actual_payload": {
+          "arguments": {
+            "effective_date": "2026-12-01",
+            "subscription_id": "SUB-8898"
+          },
+          "name": "cancel_subscription"
+        },
+        "assessment": "json_match",
+        "expected": "2026-12-01",
+        "expected_payload": {
+          "arguments": {
+            "effective_date": "2026-12-01",
+            "subscription_id": "SUB-8898"
+          },
+          "name": "cancel_subscription"
+        },
+        "mismatches": [],
+        "mode": "json_match",
+        "passed": true,
+        "reason": "ok",
+        "score": 1.0
+      },
+      "task": "tool_call_selection"
+    }
+  ]
+}

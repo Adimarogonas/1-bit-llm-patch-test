@@ -1,0 +1,46 @@
+{
+  "dataset_path": "/Users/andrewdimarogonas/Desktop/Personal Projects/bankai_poc/data/practical_evals/tool_call_selection.csv",
+  "judge": {
+    "command": "",
+    "mode": "auto",
+    "timeout_s": 180
+  },
+  "max_tokens": 200,
+  "models": [
+    {
+      "command": "",
+      "enabled": true,
+      "kind": "mlx",
+      "model_ref": "prism-ml/Bonsai-8B-mlx-1bit",
+      "name": "base-model",
+      "patch_path": null,
+      "timeout_s": 180
+    }
+  ],
+  "summary": [
+    {
+      "accuracy": 0.7,
+      "benchmark": "all",
+      "correct": 49,
+      "elapsed_s": 61.10571220799466,
+      "errors": 0,
+      "examples": 70,
+      "kind": "mlx",
+      "mean_latency_ms": 872.8813989004785,
+      "model": "base-model",
+      "scored_examples": 70
+    },
+    {
+      "accuracy": 0.7,
+      "benchmark": "tool_call_selection",
+      "correct": 49,
+      "elapsed_s": 61.10571220799466,
+      "errors": 0,
+      "examples": 70,
+      "kind": "mlx",
+      "mean_latency_ms": 872.8813989004785,
+      "model": "base-model",
+      "scored_examples": 70
+    }
+  ]
+}
