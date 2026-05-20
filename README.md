@@ -214,11 +214,13 @@ The arithmetic result is intentionally modest: it mainly validates that semantic
 This project heavily builds on:
 
 ```bibtex
-@misc{saravanan2026bankai,
-  title   = {Bankai: Ultra-Sparse Adaptation of 1-Bit LLMs via XOR Patches},
-  author  = {Saravanan, Nikshep},
-  year    = {2026},
-  url     = {https://github.com/nikshepsvn/bankai}
+@software{Saravanan_Bankai_Ultra-Sparse_Adaptation_2026,
+author = {Saravanan, Nikshep},
+license = {Apache-2.0},
+month = apr,
+title = {{Bankai: Ultra-Sparse Adaptation of 1-Bit LLMs via XOR Patches}},
+url = {https://github.com/nikshepsvn/bankai},
+year = {2026}
 }
 ```
 
